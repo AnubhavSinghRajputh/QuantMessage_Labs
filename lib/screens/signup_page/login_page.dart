@@ -198,7 +198,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  TypingTextAnimation(
+                  AuraHeadline(
                     controller: _textController,
                     fullText: '< sign in > to QuantNews',
                     highlightPart: '< sign in >',
@@ -250,44 +250,40 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   const SizedBox(height: 24),
                   FadeInOnTextAnimation(
                     controller: _textController,
-                    child: SizedBox(
-                      width: 320,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : _submitLogin,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          disabledBackgroundColor: Colors.white.withOpacity(0.5),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                    child: AuraButton(
+                      onPressed: _isSubmitting ? null : _submitLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        disabledBackgroundColor: Colors.white.withOpacity(0.5),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        child: _isSubmitting
-                            ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.black,
-                          ),
-                        )
-                            : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Sign In',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 1.0,
-                              ),
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black,
+                        ),
+                      )
+                          : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'sign in',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.0,
                             ),
-                            SizedBox(width: 8),
-                            Icon(Icons.arrow_forward, size: 18),
-                          ],
-                        ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_forward, size: 18),
+                        ],
                       ),
                     ),
                   ),
@@ -312,7 +308,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     child: TextButton(
                       onPressed: _goToSignupPage,
                       child: Text(
-                        "Don't have an account? Sign up",
+                        "Don't have an account? create",
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.35),
                           fontSize: 13,

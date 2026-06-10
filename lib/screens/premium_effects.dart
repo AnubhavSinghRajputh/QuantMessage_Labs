@@ -503,3 +503,291 @@ class FadeInOnTextAnimation extends StatelessWidget {
     );
   }
 }
+
+class CirculatingAuraPainter extends CustomPainter {
+  final double progress;
+  final double borderRadius;
+  final Color glowColor;
+  final Color accentColor;
+  final double strokeWidth;
+  final double blurSigma;
+
+  CirculatingAuraPainter({
+    required this.progress,
+    required this.borderRadius,
+    this.glowColor = Colors.white,
+    this.accentColor = Colors.greenAccent,
+    this.strokeWidth = 2.0,
+    this.blurSigma = 12.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final center = rect.center;
+    final angle = progress * 2 * math.pi;
+    final orbitScale = size.shortestSide * 0.5;
+
+    for (var i = 0; i < 3; i++) {
+      final orbitAngle = angle + (i * 2 * math.pi / 3);
+      final orbX = center.dx + math.cos(orbitAngle) * orbitScale;
+      final orbY = center.dy + math.sin(orbitAngle) * orbitScale * 0.65;
+      final orbRadius = size.shortestSide * 0.24;
+
+      final orbPaint = Paint()
+        ..shader = RadialGradient(
+          colors: [
+            accentColor.withOpacity(0.42),
+            glowColor.withOpacity(0.16),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.45, 1.0],
+        ).createShader(Rect.fromCircle(center: Offset(orbX, orbY), radius: orbRadius))
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, blurSigma);
+
+      canvas.drawCircle(Offset(orbX, orbY), orbRadius, orbPaint);
+    }
+
+    final borderRect = rect.deflate(4);
+    final rrect = RRect.fromRectAndRadius(
+      borderRect,
+      Radius.circular(borderRadius),
+    );
+
+    final sweepPaint = Paint()
+      ..shader = SweepGradient(
+        center: Alignment.center,
+        startAngle: angle,
+        endAngle: angle + math.pi * 2,
+        colors: [
+          Colors.transparent,
+          glowColor.withOpacity(0.18),
+          accentColor.withOpacity(0.82),
+          glowColor.withOpacity(0.5),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.38, 0.5, 0.62, 1.0],
+        transform: GradientRotation(angle),
+      ).createShader(rect.inflate(24))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+
+    canvas.drawRRect(rrect, sweepPaint);
+
+    final innerGlow = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          accentColor.withOpacity(0.08),
+          Colors.transparent,
+        ],
+      ).createShader(rect)
+      ..blendMode = BlendMode.screen;
+
+    canvas.drawRRect(rrect.deflate(2), innerGlow);
+  }
+
+  @override
+  bool shouldRepaint(covariant CirculatingAuraPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.borderRadius != borderRadius ||
+        oldDelegate.glowColor != glowColor ||
+        oldDelegate.accentColor != accentColor;
+  }
+}
+
+class CirculatingAura extends StatefulWidget {
+  final Widget child;
+  final double borderRadius;
+  final EdgeInsets padding;
+  final Color glowColor;
+  final Color accentColor;
+  final double strokeWidth;
+  final double blurSigma;
+  final Duration duration;
+  final AnimationController? controller;
+
+  const CirculatingAura({
+    Key? key,
+    required this.child,
+    this.borderRadius = 16,
+    this.padding = const EdgeInsets.all(6),
+    this.glowColor = Colors.white,
+    this.accentColor = Colors.greenAccent,
+    this.strokeWidth = 2.0,
+    this.blurSigma = 12.0,
+    this.duration = const Duration(seconds: 3),
+    this.controller,
+  }) : super(key: key);
+
+  @override
+  State<CirculatingAura> createState() => _CirculatingAuraState();
+}
+
+class _CirculatingAuraState extends State<CirculatingAura>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _ownedController;
+  Animation<double>? _animation;
+
+  Animation<double> get _effectiveAnimation {
+    if (widget.controller != null) {
+      return widget.controller!;
+    }
+    return _animation!;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller == null) {
+      _ownedController = AnimationController(
+        vsync: this,
+        duration: widget.duration,
+      )..repeat();
+      _animation = _ownedController;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant CirculatingAura oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.duration != widget.duration && _ownedController != null) {
+      _ownedController!
+        ..duration = widget.duration
+        ..repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ownedController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _effectiveAnimation,
+      builder: (context, child) {
+        return Padding(
+          padding: widget.padding,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: CirculatingAuraPainter(
+                    progress: _effectiveAnimation.value,
+                    borderRadius: widget.borderRadius,
+                    glowColor: widget.glowColor,
+                    accentColor: widget.accentColor,
+                    strokeWidth: widget.strokeWidth,
+                    blurSigma: widget.blurSigma,
+                  ),
+                ),
+              ),
+              child!,
+            ],
+          ),
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+class AuraHeadline extends StatelessWidget {
+  final AnimationController controller;
+  final String fullText;
+  final String highlightPart;
+  final AnimationController? auraController;
+  final double borderRadius;
+
+  const AuraHeadline({
+    Key? key,
+    required this.controller,
+    required this.fullText,
+    required this.highlightPart,
+    this.auraController,
+    this.borderRadius = 20,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CirculatingAura(
+      controller: auraController,
+      borderRadius: borderRadius,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      child: TypingTextAnimation(
+        controller: controller,
+        fullText: fullText,
+        highlightPart: highlightPart,
+      ),
+    );
+  }
+}
+
+class AuraButton extends StatelessWidget {
+  final Widget child;
+  final VoidCallback? onPressed;
+  final double width;
+  final double height;
+  final double borderRadius;
+  final ButtonStyle? style;
+  final bool outlined;
+  final AnimationController? auraController;
+
+  const AuraButton({
+    Key? key,
+    required this.child,
+    required this.onPressed,
+    this.width = 320,
+    this.height = 52,
+    this.borderRadius = 16,
+    this.style,
+    this.outlined = false,
+    this.auraController,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final button = outlined
+        ? OutlinedButton(
+      onPressed: onPressed,
+      style: style ??
+          OutlinedButton.styleFrom(
+            foregroundColor: Colors.white,
+            side: BorderSide(color: Colors.white.withOpacity(0.15)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+          ),
+      child: child,
+    )
+        : ElevatedButton(
+      onPressed: onPressed,
+      style: style ??
+          ElevatedButton.styleFrom(
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+          ),
+      child: child,
+    );
+
+    return CirculatingAura(
+      controller: auraController,
+      borderRadius: borderRadius,
+      padding: const EdgeInsets.all(4),
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: button,
+      ),
+    );
+  }
+}

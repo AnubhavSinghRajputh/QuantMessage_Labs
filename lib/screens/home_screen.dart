@@ -67,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       appBar: const PremiumAppBar(),
       body: PremiumBackgroundStack(
         bgController: _bgController,
+        showMovingDots: true,
         child: SafeArea(
           child: Center(
             child: Padding(
@@ -93,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  TypingTextAnimation(
+                  AuraHeadline(
                     controller: _textController,
                     fullText: '< coming soon > stay tuned',
                     highlightPart: '< coming soon >',
@@ -167,67 +168,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   const SizedBox(height: 20),
                   FadeInOnTextAnimation(
                     controller: _textController,
-                    child: SizedBox(
-                      width: 320,
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: _goToLoginPage,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Login',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 1.0,
-                              ),
+                    child: AuraButton(
+                      onPressed: _goToLoginPage,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'sign in',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.0,
                             ),
-                            SizedBox(width: 8),
-                            Icon(Icons.arrow_forward, size: 18),
-                          ],
-                        ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.arrow_forward, size: 18),
+                        ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   FadeInOnTextAnimation(
                     controller: _textController,
-                    child: SizedBox(
-                      width: 320,
-                      height: 52,
-                      child: OutlinedButton(
-                        onPressed: _goToSignupPage,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: BorderSide(color: Colors.white.withOpacity(0.15)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Sign Up',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 1.0,
-                              ),
+                    child: AuraButton(
+                      onPressed: _goToSignupPage,
+                      outlined: true,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'create',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.0,
                             ),
-                            SizedBox(width: 8),
-                            Icon(Icons.person_add_outlined, size: 18),
-                          ],
-                        ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.person_add_outlined, size: 18),
+                        ],
                       ),
                     ),
                   ),
