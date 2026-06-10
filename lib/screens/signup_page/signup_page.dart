@@ -2,22 +2,25 @@ import 'package:flutter/material.dart';
 
 import '../app_bar.dart';
 import '../premium_effects.dart';
-import 'signup_page.dart';
+import 'login_page.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class SignupPage extends StatefulWidget {
+  const SignupPage({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
+class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
   late AnimationController _bgController;
   late AnimationController _textController;
 
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _isSubmitting = false;
 
   @override
@@ -45,39 +48,36 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   void dispose() {
     _bgController.dispose();
     _textController.dispose();
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _goToSignupPage() {
+  void _goToLoginPage() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => const SignupPage(),
+        builder: (_) => const LoginPage(),
       ),
     );
   }
 
-  Future<void> _submitLogin() async {
+  Future<void> _submitSignup() async {
     FocusScope.of(context).unfocus();
 
+    final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Please enter both email and password.',
-            style: TextStyle(color: Colors.white.withOpacity(0.9)),
-          ),
-          backgroundColor: const Color(0xFF1A1A1F),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      _showSnackBar('Please fill in all fields.');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      _showSnackBar('Passwords do not match.');
       return;
     }
 
@@ -86,10 +86,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 
+    _showSnackBar('Account created successfully. Connect your auth API here.');
+  }
+
+  void _showSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Signed in successfully. Connect your auth API here.',
+          message,
           style: TextStyle(color: Colors.white.withOpacity(0.9)),
         ),
         backgroundColor: const Color(0xFF1A1A1F),
@@ -175,7 +179,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -188,7 +192,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       border: Border.all(color: Colors.white.withOpacity(0.1)),
                     ),
                     child: const Text(
-                      'AUTHENTICATION',
+                      'REGISTRATION',
                       style: TextStyle(
                         color: Colors.green,
                         fontSize: 9,
@@ -200,14 +204,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   const SizedBox(height: 28),
                   TypingTextAnimation(
                     controller: _textController,
-                    fullText: '< sign in > to QuantNews',
-                    highlightPart: '< sign in >',
+                    fullText: '< create > your account',
+                    highlightPart: '< create >',
                   ),
                   const SizedBox(height: 16),
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: Text(
-                      'Enter your credentials to access your personalised news feed and workspace.',
+                      'Join QuantNews and get early access to personalised news, insights, and your own workspace.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.35),
@@ -218,6 +222,16 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 40),
+                  FadeInOnTextAnimation(
+                    controller: _textController,
+                    child: _buildInputField(
+                      controller: _nameController,
+                      hintText: 'Full name',
+                      keyboardType: TextInputType.name,
+                      obscureText: false,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: _buildInputField(
@@ -247,6 +261,26 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  FadeInOnTextAnimation(
+                    controller: _textController,
+                    child: _buildInputField(
+                      controller: _confirmPasswordController,
+                      hintText: 'Confirm password',
+                      keyboardType: TextInputType.visiblePassword,
+                      obscureText: _obscureConfirmPassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.white.withOpacity(0.35),
+                          size: 18,
+                        ),
+                        onPressed: () {
+                          setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                        },
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 24),
                   FadeInOnTextAnimation(
                     controller: _textController,
@@ -254,7 +288,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       width: 320,
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : _submitLogin,
+                        onPressed: _isSubmitting ? null : _submitSignup,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Colors.black,
@@ -277,7 +311,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Sign In',
+                              'Sign Up',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -295,24 +329,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: _goToLoginPage,
                       child: Text(
-                        'Forgot password?',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.35),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w300,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ),
-                  FadeInOnTextAnimation(
-                    controller: _textController,
-                    child: TextButton(
-                      onPressed: _goToSignupPage,
-                      child: Text(
-                        "Don't have an account? Sign up",
+                        'Already have an account? Sign in',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.35),
                           fontSize: 13,

@@ -1,11 +1,199 @@
 import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
+class MovingDot {
+  final double normalizedX;
+  final double normalizedY;
+  final double radius;
+  final double driftRadius;
+  final double speed;
+  final double phase;
+  final double opacity;
+  final bool isAccent;
+
+  const MovingDot({
+    required this.normalizedX,
+    required this.normalizedY,
+    required this.radius,
+    required this.driftRadius,
+    required this.speed,
+    required this.phase,
+    required this.opacity,
+    this.isAccent = false,
+  });
+}
+
+class MovingDotsPainter extends CustomPainter {
+  final double animationValue;
+  final List<MovingDot> dots;
+  final Color baseColor;
+  final Color dotColor;
+  final Color accentDotColor;
+
+  MovingDotsPainter({
+    required this.animationValue,
+    required this.dots,
+    this.baseColor = const Color(0xFF070709),
+    this.dotColor = Colors.white,
+    this.accentDotColor = Colors.greenAccent,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(0.0, -0.35),
+          radius: 1.2,
+          colors: [
+            const Color(0xFF12121A),
+            baseColor,
+            const Color(0xFF030304),
+          ],
+          stops: const [0.0, 0.55, 1.0],
+        ).createShader(rect),
+    );
+
+    canvas.drawRect(
+      rect,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white.withOpacity(0.03),
+            Colors.transparent,
+            Colors.black.withOpacity(0.45),
+          ],
+        ).createShader(rect),
+    );
+
+    final angle = animationValue * 2 * math.pi;
+
+    for (final dot in dots) {
+      final drift = dot.driftRadius * size.shortestSide;
+      final x = dot.normalizedX * size.width +
+          math.cos(angle * dot.speed + dot.phase) * drift;
+      final y = dot.normalizedY * size.height +
+          math.sin(angle * dot.speed + dot.phase * 1.37) * drift;
+
+      final pulse = 0.75 + 0.25 * math.sin(angle * 2.4 + dot.phase);
+      final radius = dot.radius * (0.85 + size.shortestSide / 900);
+      final opacity = (dot.opacity * pulse).clamp(0.04, 0.35);
+
+      final color = dot.isAccent ? accentDotColor : dotColor;
+
+      if (dot.isAccent) {
+        final glowPaint = Paint()
+          ..color = color.withOpacity(opacity * 0.35)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+        canvas.drawCircle(Offset(x, y), radius * 2.8, glowPaint);
+      }
+
+      canvas.drawCircle(
+        Offset(x, y),
+        radius,
+        Paint()..color = color.withOpacity(opacity),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant MovingDotsPainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue ||
+        oldDelegate.dots != dots ||
+        oldDelegate.baseColor != baseColor;
+  }
+}
+
+List<MovingDot> generateMovingDots(Size size) {
+  final area = size.width * size.height;
+  final count = (area / 8500).clamp(48.0, 220.0).toInt();
+  final random = math.Random(size.width.round() ^ size.height.round());
+
+  return List.generate(count, (index) {
+    final isAccent = index % 11 == 0;
+    return MovingDot(
+      normalizedX: random.nextDouble(),
+      normalizedY: random.nextDouble(),
+      radius: lerpDouble(0.8, isAccent ? 2.4 : 1.8, random.nextDouble())!,
+      driftRadius: lerpDouble(0.012, 0.045, random.nextDouble())!,
+      speed: lerpDouble(0.35, 1.25, random.nextDouble())!,
+      phase: random.nextDouble() * math.pi * 2,
+      opacity: lerpDouble(0.08, isAccent ? 0.28 : 0.22, random.nextDouble())!,
+      isAccent: isAccent,
+    );
+  });
+}
+
+class MovingDotsBackground extends StatefulWidget {
+  final Animation<double> animation;
+  final Color baseColor;
+  final Color dotColor;
+  final Color accentDotColor;
+
+  const MovingDotsBackground({
+    Key? key,
+    required this.animation,
+    this.baseColor = const Color(0xFF070709),
+    this.dotColor = Colors.white,
+    this.accentDotColor = Colors.greenAccent,
+  }) : super(key: key);
+
+  @override
+  State<MovingDotsBackground> createState() => _MovingDotsBackgroundState();
+}
+
+class _MovingDotsBackgroundState extends State<MovingDotsBackground> {
+  List<MovingDot> _dots = const [];
+  Size _cachedSize = Size.zero;
+
+  void _ensureDots(Size size) {
+    if (_cachedSize == size) return;
+    _cachedSize = size;
+    _dots = generateMovingDots(size);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        _ensureDots(size);
+
+        return AnimatedBuilder(
+          animation: widget.animation,
+          builder: (context, child) {
+            return CustomPaint(
+              painter: MovingDotsPainter(
+                animationValue: widget.animation.value,
+                dots: _dots,
+                baseColor: widget.baseColor,
+                dotColor: widget.dotColor,
+                accentDotColor: widget.accentDotColor,
+              ),
+              child: const SizedBox.expand(),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
 class FluidBackgroundPainter extends CustomPainter {
   final double animationValue;
+  final bool drawBase;
 
-  FluidBackgroundPainter({required this.animationValue});
+  FluidBackgroundPainter({
+    required this.animationValue,
+    this.drawBase = true,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -19,8 +207,10 @@ class FluidBackgroundPainter extends CustomPainter {
     final cx = size.width / 2;
     final cy = size.height / 2;
 
-    final basePaint = Paint()..color = const Color(0xFF070709);
-    canvas.drawRect(Offset.zero & size, basePaint);
+    if (drawBase) {
+      final basePaint = Paint()..color = const Color(0xFF070709);
+      canvas.drawRect(Offset.zero & size, basePaint);
+    }
 
     final angle = animationValue * 2 * math.pi;
 
@@ -68,7 +258,8 @@ class FluidBackgroundPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant FluidBackgroundPainter oldDelegate) {
-    return oldDelegate.animationValue != animationValue;
+    return oldDelegate.animationValue != animationValue ||
+        oldDelegate.drawBase != drawBase;
   }
 }
 
@@ -225,33 +416,57 @@ class _TypingTextAnimationState extends State<TypingTextAnimation>
 class PremiumBackgroundStack extends StatelessWidget {
   final AnimationController bgController;
   final Widget child;
+  final bool showMovingDots;
+  final bool showFluidMesh;
+  final Color baseColor;
+  final Color dotColor;
+  final Color accentDotColor;
 
   const PremiumBackgroundStack({
     Key? key,
     required this.bgController,
     required this.child,
+    this.showMovingDots = true,
+    this.showFluidMesh = true,
+    this.baseColor = const Color(0xFF070709),
+    this.dotColor = Colors.white,
+    this.accentDotColor = Colors.greenAccent,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.expand,
       children: [
-        AnimatedBuilder(
-          animation: bgController,
-          builder: (context, _) {
-            return CustomPaint(
-              painter: FluidBackgroundPainter(animationValue: bgController.value),
-              child: Container(),
-            );
-          },
-        ),
+        if (showMovingDots)
+          MovingDotsBackground(
+            animation: bgController,
+            baseColor: baseColor,
+            dotColor: dotColor,
+            accentDotColor: accentDotColor,
+          )
+        else
+          ColoredBox(color: baseColor),
+        if (showFluidMesh)
+          AnimatedBuilder(
+            animation: bgController,
+            builder: (context, _) {
+              return CustomPaint(
+                painter: FluidBackgroundPainter(
+                  animationValue: bgController.value,
+                  drawBase: !showMovingDots,
+                ),
+                child: const SizedBox.expand(),
+              );
+            },
+          ),
         Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.black.withOpacity(0.4),
+                Colors.black.withOpacity(0.35),
                 Colors.transparent,
-                Colors.black.withOpacity(0.6),
+                Colors.black.withOpacity(0.55),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
