@@ -89,7 +89,7 @@ class PremiumAppBar extends StatelessWidget implements PreferredSizeWidget {
                           children: [
                             ButtonBulge(
                               child: PremiumDropdown(
-                                label: "ABOUT",
+                                label: "About",
                                 columns: _getAboutColumns(),
                               ),
                             ),

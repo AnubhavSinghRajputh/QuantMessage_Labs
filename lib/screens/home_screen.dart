@@ -8,7 +8,7 @@ import 'signup_page/google_login_page.dart';
 import 'signup_page/github_regis_page.dart';
 import 'transition_animations.dart';
 import 'button_buldge.dart';
-import 'home_animation.dart'; // <--- IMPORT THE SPACE ANIMATION
+import 'home_animation.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -66,26 +66,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    bool isMobile = screenWidth < 800;
+    double headlineSize = isMobile ? 32 : 56;
+    double subHeadlineSize = isMobile ? 14 : 18;
+    double sectionTitleSize = isMobile ? 32 : 56;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: const PremiumAppBar(),
-      // Using a Stack to layer the Space Animation and the Fluid Effects
       body: Stack(
           children: [
-          // LAYER 1: THE DEEP SPACE SIMULATION (Stars, Moon, Planets)
           const HomeAnimation(),
-
-      // LAYER 2: THE PREMIUM FLUID MESH & DOTS (Adds depth and glow)
-      // We wrap it in a Transparent container so the planets are visible beneath it
       PremiumBackgroundStack(
         bgController: _bgController,
         showMovingDots: true,
-        showFluidMesh: true,
-        baseColor: Colors.transparent, // Important: Make transparent to see space
+        baseColor: Colors.transparent,
         child: const SizedBox.expand(),
       ),
-
-      // LAYER 3: THE CONTENT
       SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -97,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               children: [
                 // --- HERO SECTION ---
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.85,
+                  height: MediaQuery.of(context).size.height * 0.8,
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -123,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             style: TextStyle(
                               fontFamily: '__copernicus_669e4a',
                               color: Colors.white,
-                              fontSize: 56,
+                              fontSize: headlineSize,
                               fontWeight: FontWeight.w800,
                               height: 1.1,
                               letterSpacing: -1.0,
@@ -134,13 +132,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         FadeInOnTextAnimation(
                           controller: _textController,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 40),
+                            padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 40),
                             child: Text(
                               'We are crafting something extraordinary. Join the next-gen agent platform built by Anubhav Singh Rajput.',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.4),
-                                fontSize: 18,
+                                fontSize: subHeadlineSize,
                                 fontWeight: FontWeight.w300,
                                 height: 1.5,
                               ),
@@ -148,8 +146,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
                         ),
                         const SizedBox(height: 48),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
+                          alignment: WrapAlignment.center,
                           children: [
                             ButtonBulge(
                               child: AuraButton(
@@ -158,7 +158,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 child: _buildButtonContent('sign in', Icons.arrow_forward),
                               ),
                             ),
-                            const SizedBox(width: 16),
                             ButtonBulge(
                               child: AuraButton(
                                 onPressed: _goToSignupPage,
@@ -179,20 +178,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 24),
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         "< Early Access >",
-                        style: TextStyle(color: Colors.white, fontSize: 56, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: sectionTitleSize,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: '__copernicus_669e4a'
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        "Register to recieve Beta version updates .",
+                        "Register to receive Beta version updates.",
                         style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14),
                       ),
                       const SizedBox(height: 30),
                       FadeInOnTextAnimation(
                         controller: _textController,
                         child: Container(
-                          width: 320,
+                          width: isMobile ? screenWidth * 0.8 : 320,
                           height: 52,
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.02),
@@ -228,25 +232,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
                       const SizedBox(height: 60),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        alignment: WrapAlignment.center,
                         children: [
                           ButtonBulge(
                             child: AuraButton(
                               onPressed: _goToGitHubPage,
                               auraController: _bgController,
-                              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.black, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.code, size: 18, color: Colors.black), const SizedBox(width: 8), const Text('GitHub', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold))]),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  foregroundColor: Colors.black,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.code, size: 18, color: Colors.black),
+                                  const SizedBox(width: 8),
+                                  const Text('GitHub', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold))
+                                ],
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 12),
                           ButtonBulge(
                             child: AuraButton(
                               onPressed: _goToGoogleLoginPage,
                               outlined: true,
                               auraController: _bgController,
-                              style: OutlinedButton.styleFrom(foregroundColor: Colors.grey[300], side: BorderSide(color: Colors.grey.withOpacity(0.2)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
-                              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.g_mobiledata, size: 18, color: Colors.white), const SizedBox(width: 8), const Text('Google', style: TextStyle(fontWeight: FontWeight.w600))]),
+                              style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.grey[300],
+                                  side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.g_mobiledata, size: 18, color: Colors.white),
+                                  const SizedBox(width: 8),
+                                  const Text('Google', style: TextStyle(fontWeight: FontWeight.w600))
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -260,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
       ),
-    ),
+    ],
     ),
     );
   }
@@ -269,7 +297,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 1.0)),
+        Text(
+          text,
+          style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.0
+          ),
+        ),
         const SizedBox(width: 8),
         Icon(icon, size: 18),
       ],
