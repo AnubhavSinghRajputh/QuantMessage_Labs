@@ -7,6 +7,7 @@ import 'signup_page/signup_page.dart';
 import 'signup_page/google_login_page.dart';
 import 'signup_page/github_regis_page.dart';
 import 'transition_animations.dart';
+import 'button_buldge.dart'; // <--- IMPORT THE BULGE ANIMATION
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -50,9 +51,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // --- NAVIGATION FLOWS ---
-  // These use slideRight to enter the auth portal
-
   void _goToLoginPage() {
     Navigator.of(context).push(
       PremiumTransitions.slideRight(const LoginPage()),
@@ -82,7 +80,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (code.isEmpty) {
       _showErrorSnackBar('Please enter an access code');
     } else {
-      // Assuming valid code takes them to login
       _goToLoginPage();
     }
   }
@@ -114,7 +111,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // System Status Tag
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
@@ -133,8 +129,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 28),
-
-                  // Animated Headline
                   AuraHeadline(
                     controller: _textController,
                     fullText: '< coming soon > stay tuned',
@@ -142,8 +136,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     auraController: _bgController,
                   ),
                   const SizedBox(height: 16),
-
-                  // Description
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: Text(
@@ -184,12 +176,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               ),
                             ),
                           ),
-                          Container(
-                            margin: const EdgeInsets.all(4.0),
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                            child: IconButton(
-                              icon: const Icon(Icons.arrow_forward, color: Colors.black, size: 18),
-                              onPressed: _handleAccessCode,
+                          // Wrapping the Submit Icon with ButtonBulge
+                          ButtonBulge(
+                            child: Container(
+                              margin: const EdgeInsets.all(4.0),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                              child: IconButton(
+                                icon: const Icon(Icons.arrow_forward, color: Colors.black, size: 18),
+                                onPressed: _handleAccessCode,
+                              ),
                             ),
                           ),
                         ],
@@ -201,10 +196,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   // 1. PRIMARY SIGN IN BUTTON
                   FadeInOnTextAnimation(
                     controller: _textController,
-                    child: AuraButton(
-                      onPressed: _goToLoginPage,
-                      auraController: _bgController,
-                      child: _buildButtonContent('sign in', Icons.arrow_forward),
+                    child: ButtonBulge( // <--- INTEGRATED
+                      child: AuraButton(
+                        onPressed: _goToLoginPage,
+                        auraController: _bgController,
+                        child: _buildButtonContent('sign in', Icons.arrow_forward),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -212,16 +209,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   // 2. SECONDARY CREATE BUTTON
                   FadeInOnTextAnimation(
                     controller: _textController,
-                    child: AuraButton(
-                      onPressed: _goToSignupPage,
-                      outlined: true,
-                      auraController: _bgController,
-                      child: _buildButtonContent('create', Icons.person_add_outlined),
+                    child: ButtonBulge( // <--- INTEGRATED
+                      child: AuraButton(
+                        onPressed: _goToSignupPage,
+                        outlined: true,
+                        auraController: _bgController,
+                        child: _buildButtonContent('create', Icons.person_add_outlined),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
 
-                  // Glassy Grey Divider
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: Row(
@@ -248,32 +246,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   // 3. GITHUB AUTH BUTTON
                   FadeInOnTextAnimation(
                     controller: _textController,
-                    child: AuraButton(
-                      onPressed: _goToGitHubPage,
-                      auraController: _bgController,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.black,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.code, size: 18, color: Colors.black),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'continue with github',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.0,
-                            ),
+                    child: ButtonBulge( // <--- INTEGRATED
+                      child: AuraButton(
+                        onPressed: _goToGitHubPage,
+                        auraController: _bgController,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.black,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.code, size: 18, color: Colors.black),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'continue with github',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -282,31 +282,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   // 4. GOOGLE AUTH BUTTON
                   FadeInOnTextAnimation(
                     controller: _textController,
-                    child: AuraButton(
-                      onPressed: _goToGoogleLoginPage,
-                      outlined: true,
-                      auraController: _bgController,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.grey[300],
-                        side: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.g_mobiledata, size: 18, color: Colors.white),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'continue with google',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.0,
-                            ),
+                    child: ButtonBulge( // <--- INTEGRATED
+                      child: AuraButton(
+                        onPressed: _goToGoogleLoginPage,
+                        outlined: true,
+                        auraController: _bgController,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.grey[300],
+                          side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.g_mobiledata, size: 18, color: Colors.white),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'continue with google',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -325,7 +327,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       children: [
         Text(
           text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 1.0),
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.0,
+          ),
         ),
         const SizedBox(width: 8),
         Icon(icon, size: 18),

@@ -1,5 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+// Relative imports based on your folder structure
+import 'app_bar_menu/premium_dropdown.dart';
+import 'button_buldge.dart'; // <--- IMPORT THE BULGE ANIMATION
 
 class PremiumAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -31,10 +34,11 @@ class PremiumAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: SafeArea(
             child: Container(
               height: preferredSize.height,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // --- 1. LEFT SECTION: BRANDING (Logo) ---
                   leading ??
                       Row(
                         mainAxisSize: MainAxisSize.min,
@@ -44,10 +48,7 @@ class PremiumAppBar extends StatelessWidget implements PreferredSizeWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               gradient: LinearGradient(
-                                colors: [
-                                  Colors.white,
-                                  Colors.white.withOpacity(0.4),
-                                ],
+                                colors: [Colors.white, Colors.white.withOpacity(0.4)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -59,46 +60,109 @@ class PremiumAppBar extends StatelessWidget implements PreferredSizeWidget {
                                 ),
                               ],
                             ),
-                            child: const Icon(
-                              Icons.blur_on,
-                              color: Colors.black,
-                              size: 18,
-                            ),
+                            child: const Icon(Icons.blur_on, color: Colors.black, size: 18),
                           ),
-                          const SizedBox(width: 10), // Slightly reduced for tighter feel
+                          const SizedBox(width: 10),
                           Text(
                             title,
-                            style: TextStyle(
-                              // MODIFIED: Using Inter/Montserrat for Antigravity look
-                              fontFamily: 'Inter',
+                            style: const TextStyle(
+                              fontFamily: '__copernicus_669e4a',
                               color: Colors.white,
-                              fontSize: 17, // Slightly increased size for impact
-                              fontWeight: FontWeight.w900, // Extra bold
-                              // MODIFIED: Decreased from 4.0 to 1.2 for a tighter, modern look
-                              letterSpacing: 1.2,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.white.withOpacity(0.2),
-                                  blurRadius: 12,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5,
+                              shadows: [Shadow(color: Colors.white30, blurRadius: 12)],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                  // --- 2. CENTER SECTION: PREMIUM DROPDOWNS WITH BULGE EFFECT ---
+                  Expanded(
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Wrapping "ABOUT" with ButtonBulge
+                          ButtonBulge(
+                            child: PremiumDropdown(
+                              label: "ABOUT",
+                              columns: [
+                                DropdownColumn(
+                                  title: "PRODUCTS",
+                                  items: [
+                                    DropdownItem(title: "QuantMessage", onTap: () {}),
+                                    DropdownItem(title: "QuantSync", onTap: () {}),
+                                    DropdownItem(title: "Windcrest", onTap: () {}),
+                                  ],
+                                ),
+                                DropdownColumn(
+                                  title: "FEATURES",
+                                  items: [
+                                    DropdownItem(title: "Chrome Extension", onTap: () {}, hasExternalLink: true),
+                                    DropdownItem(title: "Slack Integration", onTap: () {}),
+                                    DropdownItem(title: "Microsoft 365", onTap: () {}),
+                                  ],
+                                ),
+                                DropdownColumn(
+                                  title: "MODELS",
+                                  items: [
+                                    DropdownItem(title: "Opus", onTap: () {}),
+                                    DropdownItem(title: "Sonnet", onTap: () {}),
+                                    DropdownItem(title: "Haiku", onTap: () {}),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Wrapping "Platform" with ButtonBulge
+                          ButtonBulge(
+                            child: PremiumDropdown(
+                              label: "Platform",
+                              columns: [
+                                DropdownColumn(
+                                  title: "ECOSYSTEM",
+                                  items: [
+                                    DropdownItem(title: "API", onTap: () {}, hasExternalLink: true),
+                                    DropdownItem(title: "Cluster", onTap: () {}),
+                                    DropdownItem(title: "Documentation", onTap: () {}),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Wrapping "Pricing" with ButtonBulge
+                          ButtonBulge(
+                            child: PremiumDropdown(
+                              label: "Pricing",
+                              columns: [
+                                DropdownColumn(
+                                  title: "PLANS",
+                                  items: [
+                                    DropdownItem(title: "Free Tier", onTap: () {}),
+                                    DropdownItem(title: "Pro Plan", onTap: () {}),
+                                    DropdownItem(title: "Enterprise", onTap: () {}),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
                         ],
                       ),
+                    ),
+                  ),
+
+                  // --- 3. RIGHT SECTION: VERSION NUMBER ---
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: actions ??
                         [
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.15),
-                              ),
+                              border: Border.all(color: Colors.white.withOpacity(0.15)),
                               borderRadius: BorderRadius.circular(20),
                               color: Colors.white.withOpacity(0.03),
                             ),
