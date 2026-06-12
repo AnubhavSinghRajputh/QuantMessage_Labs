@@ -9,6 +9,7 @@ import '../transition_animations.dart';
 import 'signup_page.dart';
 import 'google_signin_page.dart';
 import 'github_regis_page.dart';
+import 'congrats_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -87,23 +88,37 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       return;
     }
 
+    // 1. LOCK UI: Prevent multiple clicks and visual state update
     setState(() => _isSubmitting = true);
 
     try {
+      // 2. AWAIT the authentication process
       await _authService.signIn(email: email, password: password);
+
+      // 3. SESSION GUARD: Check if we actually have a session now.
+      // This prevents the page from opening if the service returned without an error but failed to log in.
+      final session = Supabase.instance.client.auth.currentSession;
+      if (session == null) {
+        throw Exception("Authentication failed: No session established.");
+      }
+
       if (!mounted) return;
 
-      Navigator.of(context).pushAndRemoveUntil(
-        PremiumTransitions.zoomFade(const HomeScreen()),
-            (_) => false,
+      // 4. SUCCESS: Only navigate if the session check passed.
+      Navigator.of(context).pushReplacement(
+        PremiumTransitions.zoomFade(
+          CongratsPage(
+            authMethod: "Email",
+            authAction: "logged in",
+          ),
+        ),
       );
     } on AuthException catch (e) {
-      if (!mounted) return;
-      _showSnackBar(e.message);
-    } catch (_) {
-      if (!mounted) return;
-      _showSnackBar('Sign in failed. Please try again.');
+      if (mounted) _showSnackBar(e.message);
+    } catch (e) {
+      if (mounted) _showSnackBar('Sign in failed. Please check your credentials.');
     } finally {
+      // 5. UNLOCK UI: Restore button functionality
       if (mounted) setState(() => _isSubmitting = false);
     }
   }
@@ -135,7 +150,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           message,
           style: TextStyle(color: Colors.white.withOpacity(0.9)),
         ),
-        // FIXED: Removed the stray comma here that caused the error
         backgroundColor: const Color(0xFF1A1A1F),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
@@ -251,7 +265,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: Text(
-                      'Enter your credentials to access your personalised news feed and workspace.',
+                      'Enter your credentials to access your personalised feed and workspace.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.35),
@@ -296,6 +310,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: AuraButton(
+                      // DISABLE button if submitting to prevent multiple triggers
                       onPressed: _isSubmitting ? null : _submitLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -345,9 +360,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             'OR',
                             style: TextStyle(
                               color: Colors.white.withOpacity(0.2),
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: FontWeight.w300,
-                              letterSpacing: 2.0,
+                              letterSpacing: 1.0,
                             ),
                           ),
                         ),
@@ -378,7 +393,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             'continue with github',
                             style: TextStyle(
                               color: Colors.black,
-                              fontSize: 14,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.0,
                             ),
@@ -410,7 +425,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                             'continue with google',
                             style: TextStyle(
                               color: Colors.grey[300],
-                              fontSize: 14,
+                              fontSize: 18,
                               fontWeight: FontWeight.w500,
                               letterSpacing: 1.0,
                             ),

@@ -4,10 +4,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
 import '../app_bar.dart';
 import '../premium_effects.dart';
-import '../transition_animations.dart'; // PREMIUM TRANSITIONS
+import '../transition_animations.dart';
 import 'login_page.dart';
 import 'google_signin_page.dart';
 import 'github_regis_page.dart';
+import 'congrats_page.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({Key? key}) : super(key: key);
@@ -62,23 +63,21 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // --- UPDATED NAVIGATION WITH PREMIUM TRANSITIONS ---
-
   void _goToLoginPage() {
     Navigator.of(context).push(
-      PremiumTransitions.slideRight(const LoginPage()), // <--- UPDATED
+      PremiumTransitions.slideRight(const LoginPage()),
     );
   }
 
   void _goToGoogleSigninPage() {
     Navigator.of(context).push(
-      PremiumTransitions.slideRight(const GoogleSigninPage()), // <--- UPDATED
+      PremiumTransitions.slideRight(const GoogleSigninPage()),
     );
   }
 
   void _goToGitHubPage() {
     Navigator.of(context).push(
-      PremiumTransitions.slideRight(const GitHubRegisPage()), // <--- UPDATED
+      PremiumTransitions.slideRight(const GitHubRegisPage()),
     );
   }
 
@@ -90,44 +89,54 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
+    // Validation guards
     if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       _showSnackBar('Please fill in all fields.');
       return;
     }
-
     if (password != confirmPassword) {
       _showSnackBar('Passwords do not match.');
       return;
     }
-
     if (password.length < 6) {
       _showSnackBar('Password must be at least 6 characters.');
       return;
     }
 
+    // 1. LOCK UI: Prevent double-tapping the button
     setState(() => _isSubmitting = true);
 
     try {
+      // 2. WAIT for the authentication service to resolve
       await _authService.signUp(
         email: email,
         password: password,
         fullName: name,
       );
+
+      // 3. VERIFICATION GATE:
+      // Ensure the widget is still mounted before proceeding to navigation.
       if (!mounted) return;
 
-      _showSnackBar('Account created! You can sign in now.');
-
-      // Use a transition even when replacing the page for a smooth exit
+      // 4. SUCCESS: Only navigate AFTER the await has completed successfully.
+      // Using pushReplacement so the user cannot go back to the signup form.
       Navigator.of(context).pushReplacement(
-        PremiumTransitions.slideRight(const LoginPage()), // <--- UPDATED
+        PremiumTransitions.zoomFade(
+          CongratsPage(
+            authMethod: "Email",
+            authAction: "created",
+          ),
+        ),
       );
+
     } on AuthException catch (e) {
-      if (!mounted) return;
-      _showSnackBar(e.message);
-    } catch (_) {
-      if (!mounted) return;
-      _showSnackBar('Sign up failed. Please try again.');
+      // This catches Supabase-specific errors (e.g., "Email already exists")
+      if (mounted) _showSnackBar(e.message);
+    } catch (e) {
+      // This catches generic network or system errors
+      if (mounted) _showSnackBar('Account creation failed. Please try again.');
     } finally {
+      // 5. UNLOCK UI: restore button regardless of success/fail
       if (mounted) setState(() => _isSubmitting = false);
     }
   }
@@ -148,16 +157,14 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
     );
   }
 
+  // --- UI METHODS ---
+
   Widget _buildAppBarLeading() {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.white.withOpacity(0.8),
-            size: 18,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, color: Colors.white.withOpacity(0.8), size: 18),
           onPressed: () => Navigator.of(context).pop(),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
@@ -168,41 +175,25 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
-              colors: [
-                Colors.white,
-                Colors.white.withOpacity(0.4),
-              ],
+              colors: [Colors.white, Colors.white.withOpacity(0.4)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
-              BoxShadow(
-                color: Colors.white.withOpacity(0.15),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
+              BoxShadow(color: Colors.white.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 2)),
             ],
           ),
-          child: const Icon(
-            Icons.blur_on,
-            color: Colors.black,
-            size: 18,
-          ),
+          child: const Icon(Icons.blur_on, color: Colors.black, size: 18),
         ),
         const SizedBox(width: 12),
         Text(
-          'QUANTMESSAGE', // <--- UPDATED BRANDING
+          'QUANTMESSAGE',
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w800,
             letterSpacing: 4.0,
-            shadows: [
-              Shadow(
-                color: Colors.white.withOpacity(0.3),
-                blurRadius: 10,
-              ),
-            ],
+            shadows: [Shadow(color: Colors.white.withOpacity(0.3), blurRadius: 10)],
           ),
         ),
       ],
@@ -213,9 +204,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: PremiumAppBar(
-        leading: _buildAppBarLeading(),
-      ),
+      appBar: PremiumAppBar(leading: _buildAppBarLeading()),
       body: PremiumBackgroundStack(
         bgController: _bgController,
         showMovingDots: true,
@@ -236,12 +225,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                     ),
                     child: const Text(
                       'REGISTRATION',
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 2.0,
-                      ),
+                      style: TextStyle(color: Colors.green, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2.0),
                     ),
                   ),
                   const SizedBox(height: 28),
@@ -249,40 +233,26 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                     controller: _textController,
                     fullText: '< /create > your account',
                     highlightPart: '< /create >',
+                    auraController: _bgController,
                   ),
                   const SizedBox(height: 16),
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: Text(
-                      'Join QuantMessage and get early access to personalised news, insights, and your own workspace.', // <--- UPDATED
+                      'Join QuantMessage and get early access to Beta Version.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.35),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w300,
-                        letterSpacing: 0.5,
-                      ),
+                      style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 13, fontWeight: FontWeight.w300, letterSpacing: 0.5),
                     ),
                   ),
                   const SizedBox(height: 40),
                   FadeInOnTextAnimation(
                     controller: _textController,
-                    child: _buildInputField(
-                      controller: _nameController,
-                      hintText: 'Full name',
-                      keyboardType: TextInputType.name,
-                      obscureText: false,
-                    ),
+                    child: _buildInputField(controller: _nameController, hintText: 'Full name', keyboardType: TextInputType.name, obscureText: false),
                   ),
                   const SizedBox(height: 16),
                   FadeInOnTextAnimation(
                     controller: _textController,
-                    child: _buildInputField(
-                      controller: _emailController,
-                      hintText: 'Email address',
-                      keyboardType: TextInputType.emailAddress,
-                      obscureText: false,
-                    ),
+                    child: _buildInputField(controller: _emailController, hintText: 'Email address', keyboardType: TextInputType.emailAddress, obscureText: false),
                   ),
                   const SizedBox(height: 16),
                   FadeInOnTextAnimation(
@@ -293,14 +263,8 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                       keyboardType: TextInputType.visiblePassword,
                       obscureText: _obscurePassword,
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.white.withOpacity(0.35),
-                          size: 18,
-                        ),
-                        onPressed: () {
-                          setState(() => _obscurePassword = !_obscurePassword);
-                        },
+                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.white.withOpacity(0.35), size: 18),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
                     ),
                   ),
@@ -313,14 +277,8 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                       keyboardType: TextInputType.visiblePassword,
                       obscureText: _obscureConfirmPassword,
                       suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                          color: Colors.white.withOpacity(0.35),
-                          size: 18,
-                        ),
-                        onPressed: () {
-                          setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
-                        },
+                        icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility, color: Colors.white.withOpacity(0.35), size: 18),
+                        onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
                       ),
                     ),
                   ),
@@ -328,36 +286,21 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: AuraButton(
-                      onPressed: _isSubmitting ? null : _submitSignup,
+                      onPressed: _isSubmitting ? null : _submitSignup, // GUARD
+                      auraController: _bgController,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
                         disabledBackgroundColor: Colors.white.withOpacity(0.5),
                         elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: _isSubmitting
-                          ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.black,
-                        ),
-                      )
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
                           : const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(
-                            'create',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
+                          Text('create', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1.0)),
                           SizedBox(width: 8),
                           Icon(Icons.arrow_forward, size: 18),
                         ],
@@ -365,8 +308,6 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Glassy Grey Divider
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: Row(
@@ -374,101 +315,62 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                         Expanded(child: Divider(color: Colors.white.withOpacity(0.1))),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            'OR',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.2),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w300,
-                              letterSpacing: 2.0,
-                            ),
-                          ),
+                          child: Text('OR', style: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 11, fontWeight: FontWeight.w300, letterSpacing: 1.0)),
                         ),
                         Expanded(child: Divider(color: Colors.white.withOpacity(0.1))),
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // --- GITHUB AUTH BUTTON ---
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: AuraButton(
                       onPressed: _goToGitHubPage,
+                      auraController: _bgController,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         foregroundColor: Colors.black,
                         elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(Icons.code, size: 18, color: Colors.black),
                           const SizedBox(width: 8),
-                          const Text(
-                            'continue with github',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
+                          const Text('continue with github', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
-
-                  // Grey Glass Google Button
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: AuraButton(
                       onPressed: _goToGoogleSigninPage,
                       outlined: true,
+                      auraController: _bgController,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.grey[300],
                         side: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(Icons.g_mobiledata, size: 18, color: Colors.white),
                           const SizedBox(width: 8),
-                          Text(
-                            'continue with google',
-                            style: TextStyle(
-                              color: Colors.grey[300],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 1.0,
-                            ),
-                          ),
+                          Text('continue with google', style: TextStyle(color: Colors.grey[300], fontSize: 18, fontWeight: FontWeight.w500, letterSpacing: 1.0)),
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 24),
-
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: TextButton(
                       onPressed: _goToLoginPage,
-                      child: Text(
-                        'Already have an account? sign in',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.35),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w300,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
+                      child: Text('Already have an account? sign in', style: TextStyle(color: Colors.white.withOpacity(0.35), fontSize: 13, fontWeight: FontWeight.w300, letterSpacing: 0.5)),
                     ),
                   ),
                 ],
@@ -503,17 +405,10 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
               controller: controller,
               keyboardType: keyboardType,
               obscureText: obscureText,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
-                letterSpacing: 1.0,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 13, letterSpacing: 1.0),
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: TextStyle(
-                  color: Colors.white.withOpacity(0.2),
-                  fontSize: 13,
-                ),
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 13),
                 border: InputBorder.none,
               ),
             ),

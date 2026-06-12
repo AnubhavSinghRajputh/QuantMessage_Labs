@@ -50,29 +50,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // --- UPDATED NAVIGATION WITH PREMIUM TRANSITIONS ---
+  // --- NAVIGATION FLOWS ---
+  // These use slideRight to enter the auth portal
 
   void _goToLoginPage() {
     Navigator.of(context).push(
-      PremiumTransitions.slideRight(const LoginPage()), // <--- UPDATED
+      PremiumTransitions.slideRight(const LoginPage()),
     );
   }
 
   void _goToSignupPage() {
     Navigator.of(context).push(
-      PremiumTransitions.slideRight(const SignupPage()), // <--- UPDATED
+      PremiumTransitions.slideRight(const SignupPage()),
     );
   }
 
   void _goToGoogleLoginPage() {
     Navigator.of(context).push(
-      PremiumTransitions.slideRight(const GoogleLoginPage()), // <--- UPDATED
+      PremiumTransitions.slideRight(const GoogleLoginPage()),
     );
   }
 
   void _goToGitHubPage() {
     Navigator.of(context).push(
-      PremiumTransitions.slideRight(const GitHubRegisPage()), // <--- UPDATED
+      PremiumTransitions.slideRight(const GitHubRegisPage()),
     );
   }
 
@@ -81,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (code.isEmpty) {
       _showErrorSnackBar('Please enter an access code');
     } else {
+      // Assuming valid code takes them to login
       _goToLoginPage();
     }
   }
@@ -112,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Status Tag
+                  // System Status Tag
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
@@ -137,6 +139,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     controller: _textController,
                     fullText: '< coming soon > stay tuned',
                     highlightPart: '< coming soon >',
+                    auraController: _bgController,
                   ),
                   const SizedBox(height: 16),
 
@@ -200,6 +203,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     controller: _textController,
                     child: AuraButton(
                       onPressed: _goToLoginPage,
+                      auraController: _bgController,
                       child: _buildButtonContent('sign in', Icons.arrow_forward),
                     ),
                   ),
@@ -211,6 +215,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: AuraButton(
                       onPressed: _goToSignupPage,
                       outlined: true,
+                      auraController: _bgController,
                       child: _buildButtonContent('create', Icons.person_add_outlined),
                     ),
                   ),
@@ -245,6 +250,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     controller: _textController,
                     child: AuraButton(
                       onPressed: _goToGitHubPage,
+                      auraController: _bgController,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         foregroundColor: Colors.black,
@@ -279,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: AuraButton(
                       onPressed: _goToGoogleLoginPage,
                       outlined: true,
+                      auraController: _bgController,
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.grey[300],
                         side: BorderSide(color: Colors.grey.withOpacity(0.2)),

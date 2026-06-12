@@ -3,8 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../app_bar.dart';
 import '../premium_effects.dart';
-import '../home_screen.dart';
+import '../transition_animations.dart';
 import '../../services/google_auth_service.dart';
+import 'congrats_page.dart';
 
 class GoogleLoginPage extends StatefulWidget {
   const GoogleLoginPage({Key? key}) : super(key: key);
@@ -18,6 +19,7 @@ class _GoogleLoginPageState extends State<GoogleLoginPage> with TickerProviderSt
   late AnimationController _textController;
   late final GoogleAuthService _googleAuthService;
 
+  // Loading state to stop premature triggers and duplicate requests
   bool _isSubmitting = false;
 
   @override
@@ -50,21 +52,34 @@ class _GoogleLoginPageState extends State<GoogleLoginPage> with TickerProviderSt
   }
 
   Future<void> _handleGoogleSignIn() async {
+    // 1. LOCK the UI immediately.
+    // This prevents the user from clicking again and ensures the app knows it's "working"
     setState(() => _isSubmitting = true);
+
     try {
+      // 2. WAIT for the Google Auth Service to fully resolve.
+      // If this method fails, it will jump straight to the 'catch' block.
       await _googleAuthService.signInWithGoogle();
+
+      // 3. SAFETY CHECK: Ensure the user is still on this page after the await.
       if (!mounted) return;
 
-      // Navigate back to Home or a Profile page after success
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-            (_) => false,
+      // 4. SUCCESS: ONLY now do we navigate to the CongratsPage.
+      // pushReplacement ensures they can't go back to this login screen.
+      Navigator.of(context).pushReplacement(
+        PremiumTransitions.zoomFade(
+          CongratsPage(
+            authMethod: "Google",
+            authAction: "logged in",
+          ),
+        ),
       );
     } on AuthException catch (e) {
-      _showErrorSnackBar(e.message);
+      if (mounted) _showErrorSnackBar(e.message);
     } catch (e) {
-      _showErrorSnackBar('An unexpected error occurred during Google Auth.');
+      if (mounted) _showErrorSnackBar('An unexpected error occurred during Google Auth.');
     } finally {
+      // 5. UNLOCK the UI so the user can try again if they failed.
       if (mounted) setState(() => _isSubmitting = false);
     }
   }
@@ -115,7 +130,6 @@ class _GoogleLoginPageState extends State<GoogleLoginPage> with TickerProviderSt
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Header Tag
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
@@ -134,19 +148,16 @@ class _GoogleLoginPageState extends State<GoogleLoginPage> with TickerProviderSt
                     ),
                   ),
                   const SizedBox(height: 28),
-
-                  // Main Aura Headline
                   AuraHeadline(
                     controller: _textController,
                     fullText: '< /connecting > google_auth',
                     highlightPart: '< /connecting >',
                   ),
                   const SizedBox(height: 16),
-
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: Text(
-                      'Securely synchronize your Google identity with QuantNews to access your personalized workspace.',
+                      'Securely synchronize your Google identity with QuantMessage to access your personalized workspace.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.35),
@@ -157,8 +168,6 @@ class _GoogleLoginPageState extends State<GoogleLoginPage> with TickerProviderSt
                     ),
                   ),
                   const SizedBox(height: 60),
-
-                  // Large Glassy Google Icon Container
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: Container(
@@ -184,11 +193,10 @@ class _GoogleLoginPageState extends State<GoogleLoginPage> with TickerProviderSt
                     ),
                   ),
                   const SizedBox(height: 60),
-
-                  // Action Button
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: AuraButton(
+                      // DISABLE button while submitting
                       onPressed: _isSubmitting ? null : _handleGoogleSignIn,
                       child: _isSubmitting
                           ? const SizedBox(
@@ -196,7 +204,7 @@ class _GoogleLoginPageState extends State<GoogleLoginPage> with TickerProviderSt
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.black,
+                          color: Colors.black, // Keeping consistent with AuraButton style
                         ),
                       )
                           : const Row(

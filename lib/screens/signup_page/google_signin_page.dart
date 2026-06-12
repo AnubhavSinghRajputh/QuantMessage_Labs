@@ -3,7 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../app_bar.dart';
 import '../premium_effects.dart';
+import '../transition_animations.dart'; // <--- ADDED IMPORT
 import '../../services/google_auth_service.dart';
+import 'congrats_page.dart'; // <--- ADDED IMPORT
 
 class GoogleSigninPage extends StatefulWidget {
   const GoogleSigninPage({Key? key}) : super(key: key);
@@ -22,7 +24,6 @@ class _GoogleSigninPageState extends State<GoogleSigninPage> with TickerProvider
   @override
   void initState() {
     super.initState();
-    // Initialize the Web-optimized Google Service
     _googleAuthService = GoogleAuthService(Supabase.instance.client);
 
     _bgController = AnimationController(
@@ -53,15 +54,25 @@ class _GoogleSigninPageState extends State<GoogleSigninPage> with TickerProvider
   Future<void> _handleGoogleSignIn() async {
     setState(() => _isSubmitting = true);
     try {
-      // This method will trigger the browser to redirect to Google's Login Page
+      // This method triggers the Google OAuth flow
       await _googleAuthService.signInWithGoogle();
 
-      // Note: On web, the code execution stops here because the browser
-      // leaves the app. The user returns via the Redirect URL.
+      if (!mounted) return;
+
+      // SUCCESS: Redirect to Congrats Page
+      // We use "signed in" as a generic term for OAuth (which handles both login and signup)
+      Navigator.of(context).pushReplacement(
+        PremiumTransitions.zoomFade(
+          CongratsPage(
+            authMethod: "Google",
+            authAction: "signed in",
+          ),
+        ),
+      );
     } on AuthException catch (e) {
-      _showErrorSnackBar(e.message);
+      if (mounted) _showErrorSnackBar(e.message);
     } catch (e) {
-      _showErrorSnackBar('Authentication failed. Please check your network.');
+      if (mounted) _showErrorSnackBar('Authentication failed. Please check your network.');
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -205,7 +216,7 @@ class _GoogleSigninPageState extends State<GoogleSigninPage> with TickerProvider
                           Text(
                             'Initiate Handshake',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 17,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1.0,
                             ),

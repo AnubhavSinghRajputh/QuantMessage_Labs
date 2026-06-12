@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../premium_effects.dart'; // Path to your provided effects file
-import '../../services/github_auth_services.dart'; // Path to your service file
+import '../premium_effects.dart';
+import '../transition_animations.dart';
+import '../../services/github_auth_services.dart';
+import 'congrats_page.dart';
 
 class GitHubRegisPage extends StatefulWidget {
   const GitHubRegisPage({super.key});
@@ -13,23 +15,23 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
   late AnimationController _bgController;
   late AnimationController _textController;
 
+  // ADDED: Loading state to prevent premature triggers and multiple clicks
+  bool _isSubmitting = false;
+
   @override
   void initState() {
     super.initState();
 
-    // 1. Background Controller: Drives the Moving Dots and Fluid Mesh
     _bgController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 15),
     )..repeat();
 
-    // 2. Text Controller: Drives the Typing animation and Fade-ins
     _textController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
     );
 
-    // Start the text animations shortly after the page appears
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         _textController.forward();
@@ -46,11 +48,35 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
 
   // Trigger the GitHub Auth Service
   Future<void> _handleGitHubAuth() async {
+    // 1. Immediately lock the UI to prevent double-clicks or premature logic
+    setState(() => _isSubmitting = true);
+
     try {
+      // 2. Await the actual authentication process
       await GitHubAuthService().signInWithGitHub();
-      // Note: The user will be redirected to GitHub's site.
+
+      // 3. CRITICAL CHECK: Only navigate if the widget is still in the tree
+      // and the await above completed without throwing an error.
+      if (!mounted) return;
+
+      // SUCCESS: Redirect to Congrats Page
+      Navigator.of(context).pushReplacement(
+        PremiumTransitions.zoomFade(
+          CongratsPage(
+            authMethod: "GitHub",
+            authAction: "signed in",
+          ),
+        ),
+      );
     } catch (e) {
-      _showErrorSnackBar(e.toString());
+      if (mounted) {
+        _showErrorSnackBar(e.toString());
+      }
+    } finally {
+      // 4. Unlock the UI regardless of success or failure
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -68,7 +94,6 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // The PremiumBackgroundStack provides the MovingDots and InteractiveFluidPainter
       body: PremiumBackgroundStack(
         bgController: _bgController,
         showMovingDots: true,
@@ -82,7 +107,6 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  //  STATUS TAG
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
@@ -101,18 +125,13 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  //  PREMIUM TYPING HEADLINE
-                  // This uses the AuraHeadline + TypingTextAnimation from your effects file
                   AuraHeadline(
                     controller: _textController,
                     fullText: 'Authorize QuantMessage via GitHub',
                     highlightPart: 'GitHub',
-                    auraController: _bgController, // Synchronize glow with background
+                    auraController: _bgController,
                   ),
                   const SizedBox(height: 16),
-
-                  //  FADE-IN DESCRIPTION
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: Text(
@@ -128,14 +147,23 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
                   ),
                   const SizedBox(height: 50),
 
-                  //  AUTHORIZATION BUTTON
-                  // This uses the AuraButton with the CirculatingAura border
+                  // MODIFIED AUTHORIZATION BUTTON
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: AuraButton(
-                      onPressed: _handleGitHubAuth,
+                      // DISABLE button while submitting to stop premature triggers
+                      onPressed: _isSubmitting ? null : _handleGitHubAuth,
                       auraController: _bgController,
-                      child: Row(
+                      child: _isSubmitting
+                          ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                          : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(Icons.code, size: 20, color: Colors.white),
@@ -153,14 +181,12 @@ class _GitHubRegisPageState extends State<GitHubRegisPage> with TickerProviderSt
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // BACK BUTTON
                   FadeInOnTextAnimation(
                     controller: _textController,
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text(
-                        'Return to Registration',
+                        'Back to Registration',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.3),
                           fontSize: 13,
