@@ -73,7 +73,7 @@ class PremiumAppBar extends StatelessWidget implements PreferredSizeWidget {
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.w900,
-                              letterSpacing: 1.5,
+                              letterSpacing: 2.0,
                               shadows: [Shadow(color: Colors.white30, blurRadius: 12)],
                             ),
                           ),

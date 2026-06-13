@@ -9,6 +9,7 @@ import 'signup_page/github_regis_page.dart';
 import 'transition_animations.dart';
 import 'button_buldge.dart';
 import 'home_animation.dart';
+import 'frequently_asked/frequently_asked.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -44,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _goToSignupPage() => Navigator.of(context).push(PremiumTransitions.slideRight(const SignupPage()));
   void _goToGoogleLoginPage() => Navigator.of(context).push(PremiumTransitions.slideRight(const GoogleLoginPage()));
   void _goToGitHubPage() => Navigator.of(context).push(PremiumTransitions.slideRight(const GitHubRegisPage()));
+  void _goToFAQPage() => Navigator.of(context).push(PremiumTransitions.slideRight(const FrequentlyAskedScreen()));
 
   void _handleAccessCode() {
     if (_accessCodeController.text.trim().isEmpty) {
@@ -76,220 +78,250 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       extendBodyBehindAppBar: true,
       appBar: const PremiumAppBar(),
       body: Stack(
-          children: [
+        children: [
           const HomeAnimation(),
-      PremiumBackgroundStack(
-        bgController: _bgController,
-        showMovingDots: true,
-        baseColor: Colors.transparent,
-        child: const SizedBox.expand(),
-      ),
-      SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // --- HERO SECTION ---
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.8,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.04),
-                            borderRadius: BorderRadius.circular(30),
-                            border: Border.all(color: Colors.white.withOpacity(0.1)),
-                          ),
-                          child: const Text(
-                            'SYSTEM ONLINE',
-                            style: TextStyle(color: Colors.green, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2.0),
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        FadeInOnTextAnimation(
-                          controller: _textController,
-                          child: Text(
-                            '< Coming very soon >\n< stay tuned >',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: '__copernicus_669e4a',
-                              color: Colors.white,
-                              fontSize: headlineSize,
-                              fontWeight: FontWeight.w800,
-                              height: 1.1,
-                              letterSpacing: -1.0,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        FadeInOnTextAnimation(
-                          controller: _textController,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 40),
-                            child: Text(
-                              'We are crafting something extraordinary. Join the next-gen agent platform built by Anubhav Singh Rajput.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.4),
-                                fontSize: subHeadlineSize,
-                                fontWeight: FontWeight.w300,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 48),
-                        Wrap(
-                          spacing: 16,
-                          runSpacing: 16,
-                          alignment: WrapAlignment.center,
+          PremiumBackgroundStack(
+            bgController: _bgController,
+            showMovingDots: true,
+            baseColor: Colors.transparent,
+            child: const SizedBox.expand(),
+          ),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // --- HERO SECTION ---
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.8,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            ButtonBulge(
-                              child: AuraButton(
-                                onPressed: _goToLoginPage,
-                                auraController: _bgController,
-                                child: _buildButtonContent('sign in', Icons.arrow_forward),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.04),
+                                borderRadius: BorderRadius.circular(30),
+                                border: Border.all(color: Colors.white.withOpacity(0.1)),
+                              ),
+                              child: const Text(
+                                'SYSTEM ONLINE',
+                                style: TextStyle(color: Colors.green, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 2.0),
                               ),
                             ),
-                            ButtonBulge(
-                              child: AuraButton(
-                                onPressed: _goToSignupPage,
-                                outlined: true,
-                                auraController: _bgController,
-                                child: _buildButtonContent('create', Icons.person_add_outlined),
+                            const SizedBox(height: 32),
+                            FadeInOnTextAnimation(
+                              controller: _textController,
+                              child: Text(
+                                '< Coming very soon >\n< stay tuned >',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: '__copernicus_669e4a',
+                                  color: Colors.white,
+                                  fontSize: headlineSize,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.1,
+                                  letterSpacing: -1.0,
+                                ),
                               ),
+                            ),
+                            const SizedBox(height: 20),
+                            FadeInOnTextAnimation(
+                              controller: _textController,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 40),
+                                child: Text(
+                                  'We are crafting something extraordinary. Join the next-gen agent platform built by Anubhav Singh Rajput.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.4),
+                                    fontSize: subHeadlineSize,
+                                    fontWeight: FontWeight.w300,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 48),
+                            Wrap(
+                              spacing: 16,
+                              runSpacing: 16,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                ButtonBulge(
+                                  child: AuraButton(
+                                    onPressed: _goToLoginPage,
+                                    auraController: _bgController,
+                                    width: 200,
+                                    height: 48,
+                                    child: _buildButtonContent('sign in', Icons.arrow_forward),
+                                  ),
+                                ),
+                                ButtonBulge(
+                                  child: AuraButton(
+                                    onPressed: _goToSignupPage,
+                                    outlined: true,
+                                    auraController: _bgController,
+                                    width: 200,
+                                    height: 48,
+                                    child: _buildButtonContent('create', Icons.person_add_outlined),
+                                  ),
+                                ),
+                                ButtonBulge(
+                                  child: AuraButton(
+                                    onPressed: _goToFAQPage,
+                                    outlined: true,
+                                    auraController: _bgController,
+                                    width: 200,
+                                    height: 48,
+                                    child: _buildButtonContent('F.A.Q.s', Icons.help_outline_rounded),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
 
-                // --- SECOND SECTION: ACCESS CODE ---
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 24),
-                  child: Column(
-                    children: [
-                      Text(
-                        "< Early Access >",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: sectionTitleSize,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: '__copernicus_669e4a'
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        "Register to receive Beta version updates.",
-                        style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14),
-                      ),
-                      const SizedBox(height: 30),
-                      FadeInOnTextAnimation(
-                        controller: _textController,
-                        child: Container(
-                          width: isMobile ? screenWidth * 0.8 : 320,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.02),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withOpacity(0.08)),
+                    // --- SECOND SECTION: ACCESS CODE ---
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 24),
+                      child: Column(
+                        children: [
+                          Text(
+                            "< Early Access >",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: sectionTitleSize,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: '__copernicus_669e4a'
+                            ),
                           ),
-                          child: Row(
+                          const SizedBox(height: 12),
+                          Text(
+                            "Register to receive Beta version updates.",
+                            style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 14),
+                          ),
+                          const SizedBox(height: 30),
+                          FadeInOnTextAnimation(
+                            controller: _textController,
+                            child: Container(
+                              width: isMobile ? screenWidth * 0.8 : 320,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.02),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.white.withOpacity(0.08)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _accessCodeController,
+                                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                                      decoration: InputDecoration(
+                                        hintText: 'Enter access code...',
+                                        hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 13),
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  ),
+                                  ButtonBulge(
+                                    child: Container(
+                                      margin: const EdgeInsets.all(4.0),
+                                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                                      child: IconButton(
+                                        icon: const Icon(Icons.arrow_forward, color: Colors.black, size: 18),
+                                        onPressed: _handleAccessCode,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 60),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            alignment: WrapAlignment.center,
                             children: [
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: TextField(
-                                  controller: _accessCodeController,
-                                  style: const TextStyle(color: Colors.white, fontSize: 13),
-                                  decoration: InputDecoration(
-                                    hintText: 'Enter access code...',
-                                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 13),
-                                    border: InputBorder.none,
+                              ButtonBulge(
+                                child: AuraButton(
+                                  onPressed: _goToGitHubPage,
+                                  auraController: _bgController,
+                                  width: 200,
+                                  height: 48,
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.orange,
+                                      foregroundColor: Colors.black,
+                                      elevation: 0,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.code, size: 22, color: Colors.black),
+                                      const SizedBox(width: 8),
+                                      const Text('GitHub', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20))
+                                    ],
                                   ),
                                 ),
                               ),
                               ButtonBulge(
-                                child: Container(
-                                  margin: const EdgeInsets.all(4.0),
-                                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                                  child: IconButton(
-                                    icon: const Icon(Icons.arrow_forward, color: Colors.black, size: 18),
-                                    onPressed: _handleAccessCode,
+                                child: AuraButton(
+                                  onPressed: _goToGoogleLoginPage,
+                                  outlined: true,
+                                  auraController: _bgController,
+                                  width: 200,
+                                  height: 48,
+                                  style: OutlinedButton.styleFrom(
+                                      foregroundColor: Colors.grey[300],
+                                      side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.g_mobiledata, size: 24, color: Colors.white),
+                                      const SizedBox(width: 8),
+                                      const Text('Google', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20))
+                                    ],
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 60),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          ButtonBulge(
-                            child: AuraButton(
-                              onPressed: _goToGitHubPage,
-                              auraController: _bgController,
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                  foregroundColor: Colors.black,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.code, size: 18, color: Colors.black),
-                                  const SizedBox(width: 8),
-                                  const Text('GitHub', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold))
-                                ],
+                          const SizedBox(height: 30),
+                          GestureDetector(
+                            onTap: _goToFAQPage,
+                            child: Text(
+                              "Frequently Asked Questions",
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.6),
+                                fontSize: 14,
+                                decoration: TextDecoration.underline,
                               ),
                             ),
                           ),
-                          ButtonBulge(
-                            child: AuraButton(
-                              onPressed: _goToGoogleLoginPage,
-                              outlined: true,
-                              auraController: _bgController,
-                              style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.grey[300],
-                                  side: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.g_mobiledata, size: 18, color: Colors.white),
-                                  const SizedBox(width: 8),
-                                  const Text('Google', style: TextStyle(fontWeight: FontWeight.w600))
-                                ],
-                              ),
-                            ),
-                          ),
+                          const SizedBox(height: 100),
                         ],
                       ),
-                      const SizedBox(height: 100),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
-    ],
-    ),
     );
   }
 
