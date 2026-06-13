@@ -4,7 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // Import your screens
 import 'screens/splash_screen.dart';
 import 'screens/auth_guard.dart';
-import 'screens/home_screen.dart'; // <--- ADDED IMPORT for the route
+import 'screens/home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,20 +43,14 @@ class QuantMessageApp extends StatelessWidget {
       ),
 
       /*
-        1. INITIAL START:
         The app starts at the SplashScreen.
-        The SplashScreen then handles the transition to the AuthGuard.
+        SplashScreen handles the transition to AuthGuard / HomeScreen.
       */
       home: const SplashScreen(),
 
-      /*
-        2. NAMED ROUTES:
-        This is where we define the "addresses" of our pages.
-        The CongratsPage calls '/home' to redirect the user after success.
-      */
       routes: {
         '/home': (context) => const HomeScreen(),
-        // If you have a specific Dashboard page, add it here:
+        // Add other routes as needed:
         // '/dashboard': (context) => const DashboardScreen(),
       },
     );

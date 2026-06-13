@@ -306,7 +306,15 @@ class TypingTextAnimation extends StatefulWidget {
   final AnimationController controller;
   final String fullText;
   final String highlightPart;
-  const TypingTextAnimation({Key? key, required this.controller, required this.fullText, required this.highlightPart}) : super(key: key);
+  final TextStyle? style;
+
+  const TypingTextAnimation({
+    Key? key,
+    required this.controller,
+    required this.fullText,
+    required this.highlightPart,
+    this.style,
+  }) : super(key: key);
 
   @override
   State<TypingTextAnimation> createState() => _TypingTextAnimationState();
@@ -340,6 +348,7 @@ class _TypingTextAnimationState extends State<TypingTextAnimation> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    final baseStyle = widget.style ?? const TextStyle(fontFamily: 'Inter', fontSize: 38, height: 1.3, letterSpacing: -0.5);
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, child) {
@@ -348,12 +357,19 @@ class _TypingTextAnimationState extends State<TypingTextAnimation> with SingleTi
         return RichText(
           textAlign: TextAlign.center,
           text: TextSpan(
-            style: const TextStyle(fontFamily: 'Inter', fontSize: 38, height: 1.3, letterSpacing: -0.5),
+            style: baseStyle,
             children: [
-              ..._buildStyledSpans(visibleText),
+              ..._buildStyledSpans(visibleText, baseStyle),
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
-                child: Opacity(opacity: _showCursor ? 1.0 : 0.0, child: Container(width: 2.5, height: 36, color: Colors.white.withOpacity(0.8))),
+                child: Opacity(
+                  opacity: _showCursor ? 1.0 : 0.0,
+                  child: Container(
+                    width: 2.5,
+                    height: baseStyle.fontSize != null ? baseStyle.fontSize! * 0.8 : 36,
+                    color: Colors.white.withOpacity(0.8),
+                  ),
+                ),
               ),
             ],
           ),
@@ -362,14 +378,24 @@ class _TypingTextAnimationState extends State<TypingTextAnimation> with SingleTi
     );
   }
 
-  List<TextSpan> _buildStyledSpans(String typedText) {
+  List<TextSpan> _buildStyledSpans(String typedText, TextStyle baseStyle) {
     final part1 = widget.highlightPart;
+    final highlightStyle = baseStyle.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w800,
+      shadows: [const Shadow(color: Colors.white30, blurRadius: 15, offset: Offset(0, 2))],
+    );
+    final restStyle = baseStyle.copyWith(
+      color: const Color(0xFF7E7E86),
+      fontWeight: FontWeight.w300,
+    );
+
     if (typedText.length <= part1.length) {
-      return [TextSpan(text: typedText, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, shadows: [Shadow(color: Colors.white30, blurRadius: 15, offset: Offset(0, 2))]))];
+      return [TextSpan(text: typedText, style: highlightStyle)];
     }
     return [
-      TextSpan(text: part1, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, shadows: [Shadow(color: Colors.white30, blurRadius: 15, offset: Offset(0, 2))])),
-      TextSpan(text: typedText.substring(part1.length), style: const TextStyle(color: Color(0xFF7E7E86), fontWeight: FontWeight.w300)),
+      TextSpan(text: part1, style: highlightStyle),
+      TextSpan(text: typedText.substring(part1.length), style: restStyle),
     ];
   }
 }
