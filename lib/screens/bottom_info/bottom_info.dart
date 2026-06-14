@@ -1,6 +1,11 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+
+// BottomInfoPanel — QuantMessage footer, styled after Claude's mega-footer
+// Location: lib/screens/bottom_info/bottom_info.dart
+
+
 class BottomInfoPanel extends StatelessWidget {
   const BottomInfoPanel({Key? key}) : super(key: key);
 
@@ -10,61 +15,65 @@ class BottomInfoPanel extends StatelessWidget {
     final bool isMobile = screenWidth < 800;
 
     return Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
+      width: double.infinity,
+      decoration: const BoxDecoration(
         color: Color(0xFF080810),
-    border: Border(
-    top: BorderSide(color: Color(0x14FFFFFF), width: 1),
-    ),
-    ),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-    // highlight stripp
-    _FeatureStrip(isMobile: isMobile),
+        border: Border(
+          top: BorderSide(color: Color(0x14FFFFFF), width: 1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Feature highlight strip
+          _FeatureStrip(isMobile: isMobile),
 
-    // foother body
-    Padding(
-    padding: EdgeInsets.symmetric(
-    vertical: isMobile ? 48 : 72,
-    horizontal: isMobile ? 24 : 72,
-    ),
-    child: isMobile
-    ? Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    _BrandSection(),
-    const SizedBox(height: 48),
-    _FooterLinksGrid(isMobile: true),
-    ],
-    )
-        : Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    SizedBox(width: screenWidth * 0.28, child: _BrandSection()),
-    const SizedBox(width: 48),
-    const Expanded(child: _FooterLinksGrid(isMobile: false)),
-    ],
-    ),
-    ),
+          // Main footer body
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: isMobile ? 48 : 72,
+              horizontal: isMobile ? 24 : 72,
+            ),
+            child: isMobile
+                ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const _BrandSection(),
+                const SizedBox(height: 48),
+                _FooterLinksGrid(isMobile: true),
+              ],
+            )
+                : Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: screenWidth * 0.22,
+                  child: const _BrandSection(),
+                ),
+                const SizedBox(width: 56),
+                const Expanded(child: _FooterLinksGrid(isMobile: false)),
+              ],
+            ),
+          ),
 
-    // divider
-    Container(
-    margin: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 72),
-    height: 1,
-    color: const Color(0x0DFFFFFF),
-    ),
+          // Divider
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: isMobile ? 24 : 72),
+            height: 1,
+            color: const Color(0x0DFFFFFF),
+          ),
 
-    // bottom bar
-    _BottomBar(isMobile: isMobile),
-    ],
-    ),
+          // Bottom bar
+          _BottomBar(isMobile: isMobile),
+        ],
+      ),
     );
   }
 }
 
-
-// highlight strip
+// ---------------------------------------------------------------------------
+// Feature strip
+// ---------------------------------------------------------------------------
 
 class _FeatureStrip extends StatelessWidget {
   final bool isMobile;
@@ -81,7 +90,8 @@ class _FeatureStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0x0AFFFFFF), width: 1)),
+        border:
+        Border(bottom: BorderSide(color: Color(0x0AFFFFFF), width: 1)),
       ),
       padding: EdgeInsets.symmetric(
         vertical: 20,
@@ -125,7 +135,8 @@ class _FeaturePillState extends State<_FeaturePill> {
       onExit: (_) => setState(() => _hovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding:
+        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           color: _hovered
@@ -161,7 +172,9 @@ class _FeaturePillState extends State<_FeaturePill> {
   }
 }
 
-// BRAND SECTION
+// ---------------------------------------------------------------------------
+// Brand section (left column)
+// ---------------------------------------------------------------------------
 
 class _BrandSection extends StatelessWidget {
   const _BrandSection();
@@ -171,7 +184,7 @@ class _BrandSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Logo row section
+        // Logo row
         Row(
           children: [
             SizedBox(
@@ -181,7 +194,7 @@ class _BrandSection extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             const Text(
-              'QuantMessage',
+              'QUANTMESSAGE',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -193,7 +206,7 @@ class _BrandSection extends StatelessWidget {
         ),
         const SizedBox(height: 18),
         Text(
-          'Next-generation secure agent messaging platform. Built for quant analysis, autonomous pipelines, and high-frequency communication.',
+          'Next-generation secure MESSAGING phaltform. Built for analysis, autonomous pipelines, and high-frequency communication, and AI powered messaging management systems',
           style: TextStyle(
             color: Colors.white.withOpacity(0.38),
             fontSize: 13,
@@ -201,11 +214,11 @@ class _BrandSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 28),
-        // Social links
+        // Social icons
         Row(
           children: [
             _SocialButton(
-              icon: _GithubIcon(),
+              icon: const _GithubIcon(),
               tooltip: 'GitHub',
               onTap: () {},
             ),
@@ -226,8 +239,7 @@ class _BrandSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 28),
-        // Status badge
-        _StatusBadge(),
+        const _StatusBadge(),
       ],
     );
   }
@@ -285,7 +297,8 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding:
+      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: const Color(0x0A4ADE80),
@@ -294,7 +307,7 @@ class _StatusBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _PulsingDot(),
+          const _PulsingDot(),
           const SizedBox(width: 8),
           const Text(
             'All systems operational',
@@ -327,7 +340,8 @@ class _PulsingDotState extends State<_PulsingDot>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1400))
+        vsync: this,
+        duration: const Duration(milliseconds: 1400))
       ..repeat(reverse: true);
     _pulse = Tween<double>(begin: 0.5, end: 1.0).animate(
         CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
@@ -348,8 +362,7 @@ class _PulsingDotState extends State<_PulsingDot>
         height: 7,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color:
-          const Color(0xFF4ADE80).withOpacity(_pulse.value),
+          color: const Color(0xFF4ADE80).withOpacity(_pulse.value),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF4ADE80)
@@ -365,13 +378,15 @@ class _PulsingDotState extends State<_PulsingDot>
 }
 
 
-// FOOTER LINKS GRID
+// Footer links KE GRIDS   HAIN 4 COLUMS AND 4 ROWS
+
 
 class _FooterLinksGrid extends StatelessWidget {
   final bool isMobile;
   const _FooterLinksGrid({required this.isMobile});
 
-  static const _sections = [
+  // Row 1 — top four columns (matches Claude's Products / Solutions / Resources / Help)
+  static const _topSections = [
     {
       'title': 'Product',
       'links': [
@@ -380,6 +395,8 @@ class _FooterLinksGrid extends StatelessWidget {
         'AI Agent Hub',
         'Developer APIs',
         'Pricing',
+        'Download App',
+        'Log in',
       ],
     },
     {
@@ -389,7 +406,9 @@ class _FooterLinksGrid extends StatelessWidget {
         'High-Speed Pipelines',
         'Autonomous Agents',
         'Secure Comms',
-        'Data Analytics',
+        'Financial Services',
+        'Healthcare',
+        'Government',
       ],
     },
     {
@@ -400,6 +419,42 @@ class _FooterLinksGrid extends StatelessWidget {
         'Developer Docs',
         'System Status',
         'Community Blog',
+        'Tutorials',
+        'Use Cases',
+      ],
+    },
+    {
+      'title': 'Help & Security',
+      'links': [
+        'Support Center',
+        'Availability',
+        'Status Page',
+        'Responsible Disclosure',
+      ],
+    },
+  ];
+
+  // Row 2 — bottom four columns (matches Claude's Features / Claude Platform / Company / Terms)
+  static const _bottomSections = [
+    {
+      'title': 'Features',
+      'links': [
+        'QM Security',
+        'QM for Chrome',
+        'QM for Slack',
+        'QM for Excel',
+        'QM for PowerPoint',
+      ],
+    },
+    {
+      'title': 'Platform',
+      'links': [
+        'Overview',
+        'Developer Docs',
+        'Pricing',
+        'Marketplace',
+        'AWS Integration',
+        'GCP Integration',
       ],
     },
     {
@@ -410,6 +465,18 @@ class _FooterLinksGrid extends StatelessWidget {
         'Security',
         'GDPR & Trust',
         'Contact Sales',
+        'Press',
+      ],
+    },
+    {
+      'title': 'Terms & Policies',
+      'links': [
+        'Privacy Choices',
+        'Privacy Policy',
+        'Responsible Disclosure',
+        'Terms: Commercial',
+        'Terms: Consumer',
+        'Usage Policy',
       ],
     },
   ];
@@ -420,27 +487,52 @@ class _FooterLinksGrid extends StatelessWidget {
       return Wrap(
         spacing: 40,
         runSpacing: 36,
-        children: _sections
-            .map((s) => SizedBox(
-          width: 130,
+        children: [
+          ..._topSections,
+          ..._bottomSections,
+        ]
+            .map(
+              (s) => SizedBox(
+            width: 140,
+            child: _FooterColumn(
+              title: s['title'] as String,
+              links: s['links'] as List<String>,
+            ),
+          ),
+        )
+            .toList(),
+      );
+    }
+
+    // Desktop: two rows of four columns each
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _FourColumnRow(sections: _topSections),
+        const SizedBox(height: 48),
+        _FourColumnRow(sections: _bottomSections),
+      ],
+    );
+  }
+}
+
+class _FourColumnRow extends StatelessWidget {
+  final List<Map<String, Object>> sections;
+  const _FourColumnRow({required this.sections});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: sections
+          .map(
+            (s) => Expanded(
           child: _FooterColumn(
             title: s['title'] as String,
             links: s['links'] as List<String>,
           ),
-        ))
-            .toList(),
-      );
-    }
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: _sections
-          .map((s) => Expanded(
-        child: _FooterColumn(
-          title: s['title'] as String,
-          links: s['links'] as List<String>,
         ),
-      ))
+      )
           .toList(),
     );
   }
@@ -466,10 +558,12 @@ class _FooterColumn extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 18),
-        ...links.map((link) => Padding(
-          padding: const EdgeInsets.only(bottom: 13),
-          child: _FooterLink(text: link),
-        )),
+        ...links.map(
+              (link) => Padding(
+            padding: const EdgeInsets.only(bottom: 13),
+            child: _FooterLink(text: link),
+          ),
+        ),
       ],
     );
   }
@@ -503,12 +597,12 @@ class _FooterLinkState extends State<_FooterLink> {
             fontSize: 13.5,
             fontWeight: FontWeight.w400,
             height: 1.2,
-            decoration:
-            _hovered ? TextDecoration.none : TextDecoration.none,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Text(_hovered ? '' : '', // text handled below
+                  style: const TextStyle(fontSize: 0)),
               Text(widget.text),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 160),
@@ -516,8 +610,11 @@ class _FooterLinkState extends State<_FooterLink> {
                 child: _hovered
                     ? const Padding(
                   padding: EdgeInsets.only(left: 4),
-                  child: Icon(Icons.arrow_forward_rounded,
-                      size: 11, color: Color(0xFF9B8FFF)),
+                  child: Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 11,
+                    color: Color(0xFF9B8FFF),
+                  ),
                 )
                     : const SizedBox.shrink(),
               ),
@@ -529,9 +626,9 @@ class _FooterLinkState extends State<_FooterLink> {
   }
 }
 
-
-// BOTTOM BAR
-
+// ---------------------------------------------------------------------------
+// Bottom bar
+// ---------------------------------------------------------------------------
 
 class _BottomBar extends StatelessWidget {
   final bool isMobile;
@@ -542,7 +639,7 @@ class _BottomBar extends StatelessWidget {
     final year = DateTime.now().year;
 
     final copyright = Text(
-      '© $year QuantMessage, Inc. All rights reserved.',
+      '© $year QUANTMESSAGE, Inc. All rights reserved.',
       style: TextStyle(
         color: Colors.white.withOpacity(0.25),
         fontSize: 12,
@@ -564,7 +661,8 @@ class _BottomBar extends StatelessWidget {
 
     if (isMobile) {
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+        padding:
+        const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -589,7 +687,8 @@ class _BottomBar extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 72, vertical: 24),
+      padding:
+      const EdgeInsets.symmetric(horizontal: 72, vertical: 24),
       child: Row(
         children: [
           copyright,
@@ -602,9 +701,11 @@ class _BottomBar extends StatelessWidget {
 
   Widget _dot() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 8),
-    child: Text('·',
-        style: TextStyle(
-            color: Colors.white.withOpacity(0.2), fontSize: 12)),
+    child: Text(
+      '·',
+      style: TextStyle(
+          color: Colors.white.withOpacity(0.2), fontSize: 12),
+    ),
   );
 }
 
@@ -643,10 +744,10 @@ class _LegalLinkState extends State<_LegalLink> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Supporting painters / icons
+// ---------------------------------------------------------------------------
 
-// SUPPORTING WIDGETS
-
-/// A minimal GitHub-style octacat icon drawn as a custom painter.
 class _GithubIcon extends StatelessWidget {
   const _GithubIcon();
 
@@ -665,25 +766,22 @@ class _GithubIconPainter extends CustomPainter {
     final paint = Paint()
       ..color = const Color(0x80FFFFFF)
       ..style = PaintingStyle.fill;
-    // Draw a simplified circle (stylized GitHub mark)
     final cx = size.width / 2;
     final cy = size.height / 2;
     canvas.drawCircle(Offset(cx, cy), size.width / 2.2, paint);
-    // Cut out inner circle for ring effect
     paint.color = const Color(0xFF080810);
     canvas.drawCircle(Offset(cx, cy), size.width / 3.8, paint);
-    // Bottom notch to hint at octocat silhouette
     paint.color = const Color(0x80FFFFFF);
     final path = Path()
       ..moveTo(cx - 3, cy + 4)
       ..quadraticBezierTo(cx, cy + 7.5, cx + 3, cy + 4);
-    canvas.drawPath(path, paint..style = PaintingStyle.stroke..strokeWidth = 2);
+    canvas.drawPath(
+        path, paint..style = PaintingStyle.stroke..strokeWidth = 2);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
 
 class _QMLogoPainter extends CustomPainter {
   @override
@@ -709,7 +807,7 @@ class _QMLogoPainter extends CustomPainter {
     final dotPaint = Paint()..color = const Color(0xFFD4CFFF);
     canvas.drawCircle(Offset(cx, cy), r * 0.18, dotPaint);
 
-
+    // Spokes
     final spokePaint = Paint()
       ..color = const Color(0x99A89CFF)
       ..strokeWidth = 1.2
@@ -717,15 +815,17 @@ class _QMLogoPainter extends CustomPainter {
     for (int i = 0; i < 6; i++) {
       final angle = i * math.pi / 3 - math.pi / 6;
       final innerR = r * 0.22;
-      final outerR = r * 0.65;//
+      final outerR = r * 0.65;
       canvas.drawLine(
-        Offset(cx + innerR * math.cos(angle), cy + innerR * math.sin(angle)),
-        Offset(cx + outerR * math.cos(angle), cy + outerR * math.sin(angle)),
+        Offset(cx + innerR * math.cos(angle),
+            cy + innerR * math.sin(angle)),
+        Offset(cx + outerR * math.cos(angle),
+            cy + outerR * math.sin(angle)),
         spokePaint,
       );
-
       canvas.drawCircle(
-        Offset(cx + outerR * math.cos(angle), cy + outerR * math.sin(angle)),
+        Offset(cx + outerR * math.cos(angle),
+            cy + outerR * math.sin(angle)),
         r * 0.08,
         dotPaint..color = const Color(0xFFD4CFFF),
       );
