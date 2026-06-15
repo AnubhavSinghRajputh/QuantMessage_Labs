@@ -153,7 +153,7 @@ class _OverlaysPanelState extends State<OverlaysPanel>
           const SizedBox(height: 36),
 
           Text(
-            'Do more with built-in tools',
+            'Do More With QuantMessaage Tools',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily:    '__copernicus_669e4a',
