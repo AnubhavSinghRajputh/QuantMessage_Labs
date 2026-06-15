@@ -34,13 +34,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late Animation<double> _betaFadeAnimation;
   late Animation<double> _betaShimmerAnimation;
 
-  // NEW: Controller for the descriptive text typing animation
+  //  Controller for the descriptive text typing animation
   late AnimationController _descriptionController;
 
   final ScrollController _scrollController = ScrollController();
   bool _earlyAccessAnimated = false;
   bool _computingAnimated = false;
-  bool _descriptionAnimated = false; // Trigger for the descriptive text
+  bool _descriptionAnimated = false; //  the descriptive text
 
   final TextEditingController _accessCodeController = TextEditingController();
 
@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _betaShimmerAnimation = CurvedAnimation(parent: _betaTextController, curve: Curves.easeInOut);
     _betaTextController.repeat(reverse: true);
 
-    // Initialize Description Controller (Set to 1.5s for "fast" typing of a paragraph)
+    // Initialize Description Controller {Set to 1.5s for "fast" typing of a paragraph}
     _descriptionController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           _computingAnimated = true;
           _descriptionAnimated = true;
         });
-        _descriptionController.forward(); // Start fast typing
+        _descriptionController.forward();
       }
       if (_scrollController.offset > 800 && !_earlyAccessAnimated) {
         setState(() => _earlyAccessAnimated = true);
@@ -223,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
 
-                  // ── COMPUTING ANIMATION SECTION ──────────────────────────
+                  // COMPUTING ANIMATION SECTION
                   AnimatedOpacity(
                     opacity: _computingAnimated ? 1.0 : 0.0,
                     duration: const Duration(milliseconds: 800),
@@ -258,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
 
-                  // ── EARLY ACCESS SECTION ──
+                  //  EARLY ACCESS SECTION
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Container(
@@ -322,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "< The Future of MESSAGING >",
+          "< The Future of #MESSAGING >",
           style: TextStyle(
             color: Colors.greenAccent,
             fontSize: 42,
@@ -440,7 +440,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 }
 
-/// NEW: Specialized Typing Animation for Paragraphs (Left Aligned)
+///  Specialized Typing Animation for Paragraphs (Left Aligned)
 class ParagraphTypingAnimation extends StatefulWidget {
   final AnimationController controller;
   final String text;
@@ -468,7 +468,7 @@ class _ParagraphTypingAnimationState extends State<ParagraphTypingAnimation> {
         final String visibleText = widget.text.substring(0, count);
 
         return RichText(
-          textAlign: TextAlign.left, // Correct alignment for paragraphs
+          textAlign: TextAlign.left,
           text: TextSpan(
             style: widget.style,
             children: [
