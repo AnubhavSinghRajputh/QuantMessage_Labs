@@ -150,7 +150,7 @@ class _OverlaysPanelState extends State<OverlaysPanel>
           const SizedBox(height: 36),
 
           Text(
-            ' < One Phlatform For Everything >',
+            ' < One Platform For Everything >',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily:    '__copernicus_669e4a',
