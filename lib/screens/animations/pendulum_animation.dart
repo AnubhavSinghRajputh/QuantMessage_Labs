@@ -1,20 +1,10 @@
 // lib/animations/pendulum_animation.dart
-//
-// Draws the clock/pendulum icon seen in the screenshot:
-// - Outer circle ring
-// - Vertical stem (top to bottom through centre)
-// - Horizontal crosshair tick at centre
-// - Small filled dot at centre
-// - A sweeping "pendulum arm" that oscillates left↔right
 
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class PendulumAnimation extends StatefulWidget {
-  /// Size of the rendered widget (square).
   final double size;
-
-  /// Stroke colour — defaults to dark for white backgrounds.
   final Color color;
 
   const PendulumAnimation({
@@ -30,20 +20,19 @@ class PendulumAnimation extends StatefulWidget {
 class _PendulumAnimationState extends State<PendulumAnimation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
-
-  // Pendulum swings with an easeInOut feel — we use a sine curve
-  // over a full 2-second period so it feels natural.
-  late final Animation<double> _swing;
+  late final Animation<double> _rotation;
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true);
+      // Faster speed: 1500ms instead of 2000ms
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
 
-    _swing = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
+    // Linear curve for smooth continuous rotation
+    _rotation = CurvedAnimation(parent: _ctrl, curve: Curves.linear);
   }
 
   @override
@@ -55,12 +44,12 @@ class _PendulumAnimationState extends State<PendulumAnimation>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _swing,
+      animation: _rotation,
       builder: (_, __) => CustomPaint(
         size: Size(widget.size, widget.size),
         painter: _PendulumPainter(
-          swingFraction: _swing.value,
-          color:         widget.color,
+          rotationFraction: _rotation.value,
+          color: widget.color,
         ),
       ),
     );
@@ -70,20 +59,19 @@ class _PendulumAnimationState extends State<PendulumAnimation>
 // ─── Painter ──────────────────────────────────────────────────────────────────
 
 class _PendulumPainter extends CustomPainter {
-  /// 0.0 = full left, 1.0 = full right
-  final double swingFraction;
-  final Color  color;
+  final double rotationFraction; // 0.0 → 1.0 maps to 0 → 360°
+  final Color color;
 
   const _PendulumPainter({
-    required this.swingFraction,
+    required this.rotationFraction,
     required this.color,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final cx = size.width  / 2;
+    final cx = size.width / 2;
     final cy = size.height / 2;
-    final r  = size.width  / 2 - 2.5;
+    final r  = size.width / 2 - 2.5;
 
     final basePaint = Paint()
       ..color       = color
@@ -91,24 +79,24 @@ class _PendulumPainter extends CustomPainter {
       ..strokeWidth = 1.5
       ..strokeCap   = StrokeCap.round;
 
-    // ── 1. Outer circle ───────────────────────────────────────────────────
+    // Outer circle
     canvas.drawCircle(Offset(cx, cy), r, basePaint);
 
-    // ── 2. Vertical stem (top → bottom, clipped to circle radius) ─────────
+    // Vertical stem
     canvas.drawLine(
       Offset(cx, cy - r * 0.88),
       Offset(cx, cy + r * 0.88),
       basePaint,
     );
 
-    // ── 3. Horizontal crosshair tick at centre ────────────────────────────
+    // Horizontal crosshair
     canvas.drawLine(
       Offset(cx - r * 0.30, cy),
       Offset(cx + r * 0.30, cy),
       basePaint,
     );
 
-    // ── 4. Centre filled dot ──────────────────────────────────────────────
+    // Centre dot
     canvas.drawCircle(
       Offset(cx, cy),
       r * 0.10,
@@ -117,20 +105,15 @@ class _PendulumPainter extends CustomPainter {
         ..style = PaintingStyle.fill,
     );
 
-    // ── 5. Pendulum arm ───────────────────────────────────────────────────
-    // Max swing angle from vertical = 28°
-    const maxAngle = 28.0 * math.pi / 180.0;
-    // swingFraction 0→1 maps to -maxAngle → +maxAngle
-    final angle = -maxAngle + swingFraction * 2 * maxAngle;
-
-    // Arm length = inner radius (a bit shorter than r)
+    // ── Pendulum arm rotating 360° ──────────────────────────────────────────
+    final angle = rotationFraction * 2 * math.pi; // full circle
     final armLen = r * 0.72;
     final armEnd = Offset(
-      cx + armLen * math.sin(angle),
-      cy - armLen * math.cos(angle),   // subtract because y-axis is downward
+      cx + armLen * math.cos(angle),
+      cy + armLen * math.sin(angle),
     );
 
-    // Glowing arm (thicker, semi-transparent)
+    // Glowing arm
     canvas.drawLine(
       Offset(cx, cy),
       armEnd,
@@ -148,7 +131,7 @@ class _PendulumPainter extends CustomPainter {
       basePaint..strokeWidth = 1.8,
     );
 
-    // Bob at the end of the arm
+    // Bob at the end
     canvas.drawCircle(
       armEnd,
       r * 0.09,
@@ -170,5 +153,5 @@ class _PendulumPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _PendulumPainter old) =>
-      old.swingFraction != swingFraction || old.color != color;
+      old.rotationFraction != rotationFraction || old.color != color;
 }
