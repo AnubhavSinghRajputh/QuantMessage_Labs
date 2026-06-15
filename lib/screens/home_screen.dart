@@ -322,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "< The Future of Coordination >",
+          "< The Future of MESSAGING >",
           style: TextStyle(
             color: Colors.greenAccent,
             fontSize: 42,
