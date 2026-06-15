@@ -28,6 +28,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   late AnimationController _earlyAccessController;
   late Animation<double> _earlyAccessFadeInAnimation;
+
+  // Shimmer + fade-in for the "Register to receive Beta…" text
+  late AnimationController _betaTextController;
+  late Animation<double> _betaFadeAnimation;
+  late Animation<double> _betaShimmerAnimation;
+
   final ScrollController _scrollController = ScrollController();
   bool _earlyAccessAnimated = false;
 
@@ -53,6 +59,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       parent: _earlyAccessController,
       curve: const Interval(0.4, 0.75, curve: Curves.easeOut),
     );
+
+    // Shimmer controller: slow repeating loop for the green text
+    _betaTextController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2800),
+    );
+    _betaFadeAnimation = CurvedAnimation(
+      parent: _betaTextController,
+      curve: const Interval(0.0, 0.45, curve: Curves.easeOut),
+    );
+    _betaShimmerAnimation = CurvedAnimation(
+      parent: _betaTextController,
+      curve: Curves.easeInOut,
+    );
+    _betaTextController.repeat(reverse: true);
 
     _scrollController.addListener(_onScroll);
 
@@ -91,6 +112,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _bgController.dispose();
     _textController.dispose();
     _earlyAccessController.dispose();
+    _betaTextController.dispose();
     _scrollController.dispose();
     _accessCodeController.dispose();
     super.dispose();
@@ -150,8 +172,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             child: SingleChildScrollView(
               controller: _scrollController,
               physics: const BouncingScrollPhysics(),
-              // NO horizontal padding here — footer needs full width.
-              // Inner sections handle their own padding instead.
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -289,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               fontFamily: '__copernicus_669e4a',
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 48),
                           FadeTransition(
                             opacity: _earlyAccessFadeInAnimation,
                             child: LayoutBuilder(
@@ -297,12 +317,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 final bool mobile = constraints.maxWidth < 1000;
 
                                 if (mobile) {
+                                  // ── MOBILE: stack vertically, animation full width ──
                                   return Column(
                                     children: [
-                                      const SizedBox(
-                                        width: 340,
+                                      // 630×480 animation, capped to available width
+                                      SizedBox(
+                                        width: constraints.maxWidth,
                                         height: 480,
-                                        child: MessagingAnimation(),
+                                        child: const MessagingAnimation(),
                                       ),
 
                                       const SizedBox(height: 40),
@@ -315,29 +337,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   );
                                 }
 
+                                // ── DESKTOP: side-by-side ──────────────────
                                 return Center(
                                   child: ConstrainedBox(
                                     constraints: const BoxConstraints(
-                                      maxWidth: 1100,
+                                      maxWidth: 1200,
                                     ),
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.center,
                                       children: [
+                                        // Animation takes ~57% of the row (630 of 1100)
                                         Expanded(
-                                          flex: 4,
-                                          child: Center(
-                                            child: SizedBox(
-                                              width: 340,
-                                              height: 480,
-                                              child: MessagingAnimation(),
-                                            ),
+                                          flex: 57,
+                                          child: SizedBox(
+                                            // Fixed 480 height; width fills flex share
+                                            height: 480,
+                                            child: const MessagingAnimation(),
                                           ),
                                         ),
 
-                                        const SizedBox(width: 48),
+                                        const SizedBox(width: 72),
 
+                                        // Early access panel takes remaining ~43%
                                         Expanded(
-                                          flex: 5,
+                                          flex: 43,
                                           child: _buildEarlyAccessPanel(
                                             screenWidth,
                                             isMobile,
@@ -373,12 +397,56 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ) {
     return Column(
       children: [
-        Text(
-          "Register to receive Beta version updates.",
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.4),
-            fontSize: 14,
-          ),
+        // ── Shimmer italic green beta text ──────────────────────────────
+        AnimatedBuilder(
+          animation: _betaTextController,
+          builder: (context, child) {
+            // Shimmer sweeps a brighter green across the base colour
+            final shimmer = _betaShimmerAnimation.value;
+            final baseGreen  = const Color(0xFF4ADE80);
+            final glowGreen  = const Color(0xFFBBF7D0);
+            final textColor  = Color.lerp(
+              baseGreen.withOpacity(0.75),
+              glowGreen,
+              shimmer,
+            )!;
+
+            return FadeTransition(
+              opacity: _betaFadeAnimation,
+              child: ShaderMask(
+                blendMode: BlendMode.srcIn,
+                shaderCallback: (bounds) => LinearGradient(
+                  begin: Alignment(-1.0 + shimmer * 2.5, 0),
+                  end:   Alignment( 0.4 + shimmer * 2.5, 0),
+                  colors: [
+                    baseGreen.withOpacity(0.7),
+                    glowGreen,
+                    baseGreen.withOpacity(0.7),
+                  ],
+                  stops: const [0.0, 0.5, 1.0],
+                ).createShader(bounds),
+                child: Text(
+                  "Register to receive Beta version updates.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                    fontStyle: FontStyle.italic,
+                    letterSpacing: 0.3,
+                    height: 1.5,
+                    shadows: [
+                      Shadow(
+                        color: const Color(0xFF4ADE80).withOpacity(0.45 * shimmer),
+                        blurRadius: 14,
+                        offset: Offset.zero,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
         ),
         const SizedBox(height: 30),
 

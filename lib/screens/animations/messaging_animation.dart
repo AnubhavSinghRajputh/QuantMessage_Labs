@@ -1,10 +1,8 @@
-import 'dart:math' as math;
-import 'package:flutter/material.dart';
-
-
-// Location: lib/animations/messaging_animation.dart
+// messaging_animation.dart
+// Updated: Black & white theme matching premium_effects.dart
+// Wide rectangular panel for home_screen.dart integration
 //
-// Usage in home_screen.dart (beside Early Access section):
+// Usage in home_screen.dart:
 //
 //   Row(
 //     crossAxisAlignment: CrossAxisAlignment.center,
@@ -12,12 +10,15 @@ import 'package:flutter/material.dart';
 //       Expanded(child: /* your Early Access column */),
 //       SizedBox(width: 48),
 //       SizedBox(
-//         width: 340,
+//         width: 630,
 //         height: 480,
 //         child: MessagingAnimation(),
 //       ),
 //     ],
 //   )
+
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
 
 class MessagingAnimation extends StatefulWidget {
   const MessagingAnimation({Key? key}) : super(key: key);
@@ -28,30 +29,32 @@ class MessagingAnimation extends StatefulWidget {
 
 class _MessagingAnimationState extends State<MessagingAnimation>
     with TickerProviderStateMixin {
-  // Master timeline that loops indefinitely
   late AnimationController _masterController;
 
-  // Each "bubble" flying across the panel
   final List<_BubbleData> _bubbles = [];
   final math.Random _rng = math.Random();
 
-  // How many bubbles we keep in the pool
   static const int _poolSize = 12;
 
-  // Labels shown on each system node
-  static const String _labelLeft = 'QM Node A';
+  static const String _labelLeft  = 'QM Node A';
   static const String _labelRight = 'QM Node B';
 
-  // Accent color (matches QuantMessage purple palette)
-  static const Color _accent = Color(0xFF9B8FFF);
-  static const Color _accentDim = Color(0x339B8FFF);
-  static const Color _panelBg = Color(0xFF0C0C18);
-  static const Color _borderColor = Color(0x1AFFFFFF);
-  static const Color _nodeBg = Color(0xFF13132A);
-  static const Color _nodeBorder = Color(0x339B8FFF);
-  static const Color _pulseColor = Color(0x269B8FFF);
+  // ── B&W palette (mirrors premium_effects.dart dark base) ──────────────────
+  static const Color _panelBg      = Color(0xFF070709);   // same as baseColor
+  static const Color _borderColor  = Color(0x1AFFFFFF);   // white @ 10%
+  static const Color _nodeBg       = Color(0xFF12121A);   // same as radial mid
+  static const Color _nodeBorder   = Color(0x33FFFFFF);   // white @ 20%
+  static const Color _pulseColor   = Color(0x26FFFFFF);   // white @ 15%
+  static const Color _dotWhite     = Colors.white;
+  static const Color _accentWhite  = Color(0xFFF5F5F5);   // faint white accent
 
-  // Sample message snippets cycling through bubbles
+  // Bubble colours: white, grey, faint-white — matching InteractiveFluidPainter cycle
+  static const List<Color> _bubbleColors = [
+    Color(0xFFFFFFFF), // white
+    Color(0xFFBDBDBD), // greyish white
+    Color(0xFFF5F5F5), // faint white
+  ];
+
   static const List<String> _snippets = [
     'INIT_HANDSHAKE',
     '0xA3F9…4C2B',
@@ -76,37 +79,33 @@ class _MessagingAnimationState extends State<MessagingAnimation>
   @override
   void initState() {
     super.initState();
-
     _masterController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
-    )..addListener(_tick)..repeat();
+    )
+      ..addListener(_tick)
+      ..repeat();
 
-    // Seed the bubble pool with staggered start times
     for (int i = 0; i < _poolSize; i++) {
-      _bubbles.add(_makeBubble(
-        initialProgress: i / _poolSize,
-      ));
+      _bubbles.add(_makeBubble(initialProgress: i / _poolSize));
     }
   }
 
   _BubbleData _makeBubble({double initialProgress = 0.0}) {
     final leftToRight = _rng.nextBool();
-    final speed = 0.004 + _rng.nextDouble() * 0.006; // progress per tick (~60 fps)
-    final yFraction = 0.2 + _rng.nextDouble() * 0.6; // vertical lane
-    final snippet = _snippets[_snippetIndex % _snippets.length];
+    final speed       = 0.004 + _rng.nextDouble() * 0.006;
+    final yFraction   = 0.2   + _rng.nextDouble() * 0.6;
+    final snippet     = _snippets[_snippetIndex % _snippets.length];
     _snippetIndex++;
-
-    // Pick a highlight color variant
-    final colorVariant = _rng.nextInt(3);
+    final colorVariant = _rng.nextInt(_bubbleColors.length);
 
     return _BubbleData(
-      progress: initialProgress,
-      speed: speed,
-      leftToRight: leftToRight,
-      yFraction: yFraction,
-      snippet: snippet,
-      colorVariant: colorVariant,
+      progress:      initialProgress,
+      speed:         speed,
+      leftToRight:   leftToRight,
+      yFraction:     yFraction,
+      snippet:       snippet,
+      colorVariant:  colorVariant,
     );
   }
 
@@ -131,88 +130,100 @@ class _MessagingAnimationState extends State<MessagingAnimation>
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
+      // Fill the entire slot — width and height are independent
       final w = constraints.maxWidth;
       final h = constraints.maxHeight;
 
       return Container(
-        width: w,
+        width:  w,
         height: h,
         decoration: BoxDecoration(
-          color: _panelBg,
+          // Radial gradient background identical to MovingDotsPainter
+          gradient: const RadialGradient(
+            center: Alignment(0.0, -0.35),
+            radius: 1.2,
+            colors: [
+              Color(0xFF12121A),
+              Color(0xFF070709),
+              Color(0xFF030304),
+            ],
+            stops: [0.0, 0.55, 1.0],
+          ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: _borderColor, width: 1),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
-            // Subtle grid lines in background
+            // Subtle grid — same low opacity as premium_effects dots
             CustomPaint(
               size: Size(w, h),
               painter: _GridPainter(),
             ),
 
-            // Animated bubbles
+            // Animated message bubbles
             CustomPaint(
               size: Size(w, h),
               painter: _BubblePainter(
-                bubbles: _bubbles,
-                width: w,
-                height: h,
-                accent: _accent,
+                bubbles:      _bubbles,
+                width:        w,
+                height:       h,
+                bubbleColors: _bubbleColors,
               ),
             ),
 
-            // System node — LEFT
+            // Left node
             Positioned(
-              left: 12,
-              top: h / 2 - 52,
+              left: 14,
+              top:  h / 2 - 52,
               child: _SystemNode(
-                label: _labelLeft,
-                icon: Icons.developer_board_rounded,
-                accent: _accent,
-                nodeBg: _nodeBg,
-                nodeBorder: _nodeBorder,
-                pulseColor: _pulseColor,
+                label:            _labelLeft,
+                icon:             Icons.developer_board_rounded,
+                nodeBg:           _nodeBg,
+                nodeBorder:       _nodeBorder,
+                pulseColor:       _pulseColor,
+                dotColor:         _dotWhite,
                 masterController: _masterController,
               ),
             ),
 
-            // System node — RIGHT
+            // Right node
             Positioned(
-              right: 12,
-              top: h / 2 - 52,
+              right: 14,
+              top:   h / 2 - 52,
               child: _SystemNode(
-                label: _labelRight,
-                icon: Icons.hub_rounded,
-                accent: _accent,
-                nodeBg: _nodeBg,
-                nodeBorder: _nodeBorder,
-                pulseColor: _pulseColor,
+                label:            _labelRight,
+                icon:             Icons.hub_rounded,
+                nodeBg:           _nodeBg,
+                nodeBorder:       _nodeBorder,
+                pulseColor:       _pulseColor,
+                dotColor:         _dotWhite,
                 masterController: _masterController,
-                flipPulse: true,
+                flipPulse:        true,
               ),
             ),
 
-            // Top label
+            // Top badge — styled like CirculatingAura label
             Positioned(
-              top: 16,
-              left: 0,
+              top:   16,
+              left:  0,
               right: 0,
               child: Center(
                 child: Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.04),
+                    color:        Colors.white.withOpacity(0.04),
                     borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: Colors.white.withOpacity(0.08)),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.08),
+                    ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'LIVE CHANNEL',
                     style: TextStyle(
-                      color: Color(0xFF9B8FFF),
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
+                      color:       Colors.white.withOpacity(0.55),
+                      fontSize:    9,
+                      fontWeight:  FontWeight.w700,
                       letterSpacing: 2.0,
                     ),
                   ),
@@ -223,8 +234,8 @@ class _MessagingAnimationState extends State<MessagingAnimation>
             // Bottom stats bar
             Positioned(
               bottom: 0,
-              left: 0,
-              right: 0,
+              left:   0,
+              right:  0,
               child: _StatsBar(masterController: _masterController),
             ),
           ],
@@ -239,7 +250,7 @@ class _MessagingAnimationState extends State<MessagingAnimation>
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _BubbleData {
-  double progress; // 0.0 → 1.0 across the panel
+  double progress;
   final double speed;
   final bool leftToRight;
   final double yFraction;
@@ -257,71 +268,67 @@ class _BubbleData {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Bubble painter
+// Bubble painter — B&W variant
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _BubblePainter extends CustomPainter {
   final List<_BubbleData> bubbles;
   final double width;
   final double height;
-  final Color accent;
+  final List<Color> bubbleColors;
 
-  static const double _nodeWidth = 76.0;
-  static const double _trackPad = _nodeWidth + 16;
+  static const double _nodeWidth = 80.0;
+  static const double _trackPad  = _nodeWidth + 18;
 
-  _BubblePainter({
+  const _BubblePainter({
     required this.bubbles,
     required this.width,
     required this.height,
-    required this.accent,
+    required this.bubbleColors,
   });
-
-  static const List<Color> _variants = [
-    Color(0xFF9B8FFF), // purple
-    Color(0xFF4ADE80), // green
-    Color(0xFF38BDF8), // cyan
-  ];
 
   @override
   void paint(Canvas canvas, Size size) {
     final trackStart = _trackPad;
-    final trackEnd = width - _trackPad;
+    final trackEnd   = width - _trackPad;
     final trackWidth = trackEnd - trackStart;
 
     for (final b in bubbles) {
-      final color = _variants[b.colorVariant % _variants.length];
+      final color = bubbleColors[b.colorVariant % bubbleColors.length];
       final t = b.leftToRight ? b.progress : (1.0 - b.progress);
       final x = trackStart + t * trackWidth;
       final y = height * b.yFraction;
 
-      // Fade in/out at edges
       final edgeFade = (b.progress < 0.08)
           ? b.progress / 0.08
           : (b.progress > 0.92)
           ? (1.0 - b.progress) / 0.08
           : 1.0;
 
-      // Trail line behind the bubble
-      final trailLength = 32.0;
+      // Trail
+      const trailLength = 32.0;
       final trailDx = b.leftToRight ? -trailLength : trailLength;
       final trailPaint = Paint()
         ..shader = LinearGradient(
-          colors: [color.withOpacity(0), color.withOpacity(0.35 * edgeFade)],
-          begin: b.leftToRight ? Alignment.centerLeft : Alignment.centerRight,
-          end: b.leftToRight ? Alignment.centerRight : Alignment.centerLeft,
+          colors: [
+            color.withOpacity(0),
+            color.withOpacity(0.25 * edgeFade),
+          ],
+          begin: b.leftToRight ? Alignment.centerLeft  : Alignment.centerRight,
+          end:   b.leftToRight ? Alignment.centerRight : Alignment.centerLeft,
         ).createShader(Rect.fromLTWH(x + trailDx, y - 1, trailLength, 2))
-        ..strokeWidth = 1.5
+        ..strokeWidth = 1.0
         ..style = PaintingStyle.stroke;
       canvas.drawLine(Offset(x + trailDx, y), Offset(x, y), trailPaint);
 
-      // Pill body
+      // Pill text
       final textPainter = TextPainter(
         text: TextSpan(
           text: b.snippet,
           style: TextStyle(
-            color: color,
-            fontSize: 9,
-            fontWeight: FontWeight.w600,
+            color:       color.withOpacity(0.9 * edgeFade),
+            fontSize:    9,
+            fontWeight:  FontWeight.w600,
             letterSpacing: 0.5,
           ),
         ),
@@ -329,39 +336,41 @@ class _BubblePainter extends CustomPainter {
       )..layout();
 
       final pillW = textPainter.width + 16;
-      final pillH = 20.0;
+      const pillH = 20.0;
       final pillRect = RRect.fromRectAndRadius(
         Rect.fromCenter(center: Offset(x, y), width: pillW, height: pillH),
         const Radius.circular(6),
       );
 
-      // Shadow glow
+      // Soft glow (very subtle — matches MovingDotsPainter accent glow)
       canvas.drawRRect(
         pillRect.inflate(3),
         Paint()
-          ..color = color.withOpacity(0.12 * edgeFade)
+          ..color = color.withOpacity(0.08 * edgeFade)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
       );
 
-      // Background
+      // Pill background: very dark with slight white tint
       canvas.drawRRect(
         pillRect,
         Paint()
-          ..color =
-          Color.lerp(const Color(0xFF0C0C18), color, 0.1)!.withOpacity(edgeFade)
+          ..color = Color.lerp(
+            const Color(0xFF0A0A10),
+            color,
+            0.07,
+          )!.withOpacity(edgeFade)
           ..style = PaintingStyle.fill,
       );
 
-      // Border
+      // Pill border — white at low opacity
       canvas.drawRRect(
         pillRect,
         Paint()
-          ..color = color.withOpacity(0.45 * edgeFade)
+          ..color = color.withOpacity(0.28 * edgeFade)
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 0.8,
+          ..strokeWidth = 0.7,
       );
 
-      // Text
       textPainter.paint(
         canvas,
         Offset(x - textPainter.width / 2, y - textPainter.height / 2),
@@ -374,7 +383,7 @@ class _BubblePainter extends CustomPainter {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Background grid painter
+// Grid painter — same subtle grid as premium_effects background feel
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _GridPainter extends CustomPainter {
@@ -398,26 +407,26 @@ class _GridPainter extends CustomPainter {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// System node widget (left / right)
+// System node — B&W, matches CirculatingAura glow style
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _SystemNode extends StatelessWidget {
   final String label;
   final IconData icon;
-  final Color accent;
   final Color nodeBg;
   final Color nodeBorder;
   final Color pulseColor;
+  final Color dotColor;
   final AnimationController masterController;
   final bool flipPulse;
 
   const _SystemNode({
     required this.label,
     required this.icon,
-    required this.accent,
     required this.nodeBg,
     required this.nodeBorder,
     required this.pulseColor,
+    required this.dotColor,
     required this.masterController,
     this.flipPulse = false,
   });
@@ -427,32 +436,36 @@ class _SystemNode extends StatelessWidget {
     return AnimatedBuilder(
       animation: masterController,
       builder: (context, _) {
-        // Pulsing glow ring
-        final pulseT = (masterController.value + (flipPulse ? 0.5 : 0.0)) % 1.0;
-        final glowOpacity = (math.sin(pulseT * math.pi * 2) * 0.5 + 0.5);
+        final pulseT      = (masterController.value + (flipPulse ? 0.5 : 0.0)) % 1.0;
+        final glowOpacity = math.sin(pulseT * math.pi * 2) * 0.5 + 0.5;
 
         return SizedBox(
-          width: 76,
+          width: 80,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Circulating-aura-style glow box
               Container(
-                width: 52,
-                height: 52,
+                width:  54,
+                height: 54,
                 decoration: BoxDecoration(
-                  color: nodeBg,
+                  color:        nodeBg,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: nodeBorder, width: 1),
+                  border:       Border.all(color: nodeBorder, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: accent.withOpacity(0.18 * glowOpacity),
-                      blurRadius: 16,
+                      color:       Colors.white.withOpacity(0.12 * glowOpacity),
+                      blurRadius:  18,
                       spreadRadius: 2,
                     ),
                   ],
                 ),
                 child: Center(
-                  child: Icon(icon, color: accent, size: 22),
+                  child: Icon(
+                    icon,
+                    color: Colors.white.withOpacity(0.75),
+                    size:  22,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -460,26 +473,29 @@ class _SystemNode extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.55),
-                  fontSize: 9,
-                  fontWeight: FontWeight.w600,
+                  color:         Colors.white.withOpacity(0.45),
+                  fontSize:      9,
+                  fontWeight:    FontWeight.w600,
                   letterSpacing: 0.4,
                 ),
               ),
               const SizedBox(height: 4),
-              // Activity indicator dots
+              // Activity dots — white, matching MovingDotsPainter accent dots
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(3, (i) {
-                  final dotT =
-                      (masterController.value * 3 - i * 0.33 + (flipPulse ? 1.5 : 0)) % 1.0;
-                  final dotOpacity = (math.sin(dotT * math.pi * 2) * 0.5 + 0.5);
+                  final dotT = (masterController.value * 3 -
+                      i * 0.33 +
+                      (flipPulse ? 1.5 : 0)) %
+                      1.0;
+                  final dotOpacity =
+                      math.sin(dotT * math.pi * 2) * 0.5 + 0.5;
                   return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                    width: 4,
+                    margin:     const EdgeInsets.symmetric(horizontal: 1.5),
+                    width:  4,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: accent.withOpacity(0.3 + 0.7 * dotOpacity),
+                      color: Colors.white.withOpacity(0.2 + 0.6 * dotOpacity),
                       shape: BoxShape.circle,
                     ),
                   );
@@ -494,7 +510,7 @@ class _SystemNode extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Bottom stats bar
+// Bottom stats bar — B&W
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _StatsBar extends StatefulWidget {
@@ -506,9 +522,9 @@ class _StatsBar extends StatefulWidget {
 }
 
 class _StatsBarState extends State<_StatsBar> {
-  int _packetCount = 0;
-  double _latency = 0.3;
-  int _ticker = 0;
+  int    _packetCount = 0;
+  double _latency     = 0.3;
+  int    _ticker      = 0;
 
   @override
   void initState() {
@@ -522,7 +538,7 @@ class _StatsBarState extends State<_StatsBar> {
     if (_ticker % 4 == 0) {
       setState(() {
         _packetCount += 1 + math.Random().nextInt(3);
-        _latency = 0.1 + math.Random().nextDouble() * 0.6;
+        _latency      = 0.1 + math.Random().nextDouble() * 0.6;
       });
     }
   }
@@ -537,10 +553,10 @@ class _StatsBarState extends State<_StatsBar> {
   Widget build(BuildContext context) {
     return Container(
       height: 36,
-      decoration: const BoxDecoration(
-        color: Color(0xFF09091A),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.55),
         border: Border(
-          top: BorderSide(color: Color(0x14FFFFFF), width: 1),
+          top: BorderSide(color: Colors.white.withOpacity(0.08), width: 1),
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -548,25 +564,26 @@ class _StatsBarState extends State<_StatsBar> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _Stat(label: 'PKTS', value: '$_packetCount'),
-          _Stat(label: 'LAT', value: '${_latency.toStringAsFixed(1)}ms'),
-          _Stat(label: 'ENC', value: 'AES-256'),
+          _Stat(label: 'LAT',  value: '${_latency.toStringAsFixed(1)}ms'),
+          _Stat(label: 'ENC',  value: 'AES-256'),
           Row(
             children: [
               Container(
-                width: 6,
+                width:  6,
                 height: 6,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF4ADE80),
+                decoration: BoxDecoration(
+                  // White dot for online — matches dotColor in MovingDotsPainter
+                  color: Colors.white.withOpacity(0.8),
                   shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: 4),
-              const Text(
+              Text(
                 'ONLINE',
                 style: TextStyle(
-                  color: Color(0xFF4ADE80),
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
+                  color:         Colors.white.withOpacity(0.55),
+                  fontSize:      9,
+                  fontWeight:    FontWeight.w700,
                   letterSpacing: 1.0,
                 ),
               ),
@@ -590,18 +607,18 @@ class _Stat extends StatelessWidget {
         Text(
           '$label ',
           style: TextStyle(
-            color: Colors.white.withOpacity(0.3),
-            fontSize: 9,
-            fontWeight: FontWeight.w500,
+            color:         Colors.white.withOpacity(0.28),
+            fontSize:      9,
+            fontWeight:    FontWeight.w500,
             letterSpacing: 0.8,
           ),
         ),
         Text(
           value,
-          style: const TextStyle(
-            color: Color(0xFF9B8FFF),
-            fontSize: 9,
-            fontWeight: FontWeight.w700,
+          style: TextStyle(
+            color:         Colors.white.withOpacity(0.72),
+            fontSize:      9,
+            fontWeight:    FontWeight.w700,
             letterSpacing: 0.5,
           ),
         ),
