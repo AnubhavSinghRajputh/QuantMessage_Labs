@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../animations/animation_widget/desktop_animation.dart';
+import '../animations/animation_widget/terminal_animation.dart';
 import '../transition_animations.dart';
 import '../buttons/moving_icons_button.dart';
 
@@ -48,11 +49,16 @@ class OverlaysExtended extends StatefulWidget {
   final bool animateContentSwap;
   final Key? contentKey; // change to trigger internal AnimatedSwitcher
 
-  // ── NEW: Moving icons (segmented control) configuration ───────────────────
+  // ── Moving icons (segmented control) configuration ────────────────────────
   /// Whether to show the [MovingIconsButton] segmented control in the header.
   final bool showSegmentedControl;
 
   /// Labels for the segmented control. Defaults to Desktop / Terminal / Web & iOS.
+  ///
+  /// The index of the label matching (case-insensitively) "Terminal" is what
+  /// triggers the [TerminalAnimation] preview in [_buildAnimatedBody]. If you
+  /// rename or reorder labels, the lookup is done by text, not position, so
+  /// it keeps working.
   final List<String> segmentLabels;
 
   /// Index initially selected in the segmented control.
@@ -208,6 +214,16 @@ class _OverlaysExtendedState extends State<OverlaysExtended>
     if (index == _segmentIndex) return;
     setState(() => _segmentIndex = index);
     widget.onSegmentChanged?.call(index, label);
+  }
+
+  /// True when the currently selected segment label is "Terminal"
+  /// (case-insensitive), regardless of its position in [widget.segmentLabels].
+  bool get _isTerminalSegmentSelected {
+    if (_segmentIndex < 0 || _segmentIndex >= widget.segmentLabels.length) {
+      return false;
+    }
+    return widget.segmentLabels[_segmentIndex].trim().toLowerCase() ==
+        'terminal';
   }
 
   void _attachScrollListener() {
@@ -366,18 +382,11 @@ class _OverlaysExtendedState extends State<OverlaysExtended>
   }
 
   /// Wraps the body in an [AnimatedSwitcher] so that swaps
-  /// (e.g. desktop → customContent, or any rebuild with a new
-  /// [OverlaysExtended.contentKey]) animate using the configured
-  /// [OverlayTransitionType].
+  /// (e.g. desktop → terminal preview, desktop → customContent, or any
+  /// rebuild with a new [OverlaysExtended.contentKey]) animate using the
+  /// configured [OverlayTransitionType].
   Widget _buildAnimatedBody() {
-    final body = widget.showDesktop
-        ? _buildDesktopSection()
-        : widget.customContent != null
-        ? Padding(
-      padding: widget.padding,
-      child: widget.customContent!,
-    )
-        : const SizedBox.shrink();
+    final body = _resolveBody();
 
     if (!widget.animateContentSwap) return body;
 
@@ -392,6 +401,30 @@ class _OverlaysExtendedState extends State<OverlaysExtended>
         child: body,
       ),
     );
+  }
+
+  /// Decides which body content to show. When the "Terminal" segment is
+  /// selected, the [TerminalAnimation] preview swaps in instead of the
+  /// usual desktop preview / custom content. An explicit
+  /// [widget.contentKey] from the caller still drives the [AnimatedSwitcher]
+  /// key above, but this method controls what's actually rendered.
+  Widget _resolveBody() {
+    if (widget.showSegmentedControl && _isTerminalSegmentSelected) {
+      return _buildTerminalSection();
+    }
+
+    if (widget.showDesktop) {
+      return _buildDesktopSection();
+    }
+
+    if (widget.customContent != null) {
+      return Padding(
+        padding: widget.padding,
+        child: widget.customContent!,
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   /// Aligns incoming and outgoing children to the top, which is
@@ -581,6 +614,50 @@ class _OverlaysExtendedState extends State<OverlaysExtended>
             }
 
             return DesktopAnimation(
+              width: width,
+              height: height,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // ── Terminal section (shown when the "Terminal" segment is selected) ─────
+
+  Widget _buildTerminalSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAFAFA),
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.black.withOpacity(0.06),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Center(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            double width = constraints.maxWidth * widget.desktopWidthFactor;
+            double height = width / widget.desktopAspectRatio;
+
+            height = height.clamp(widget.minDesktopHeight, widget.maxDesktopHeight);
+
+            if (constraints.maxWidth < 600) {
+              width = constraints.maxWidth * 0.95;
+              height = width / 1.4;
+              height = height.clamp(220.0, 340.0);
+            }
+
+            if (widget.compactScale != 1.0) {
+              width  *= widget.compactScale;
+              height *= widget.compactScale;
+            }
+
+            return TerminalAnimation(
               width: width,
               height: height,
             );
