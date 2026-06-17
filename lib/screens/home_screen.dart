@@ -1,5 +1,3 @@
-// lib/screens/home_screen.dart
-
 import 'package:flutter/material.dart';
 import 'app_bar.dart';
 import 'premium_effects.dart';
@@ -21,6 +19,7 @@ import 'animations/features_web_animations.dart';
 import 'overlays/overlays_pannel.dart';
 import 'overlays/features_overlay.dart';
 import 'overlays/overlays_extended.dart';
+import 'app_bar_menu/about/windcrest_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -215,6 +214,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _goToGitHubPage()      => Navigator.of(context).push(PremiumTransitions.slideRight(const GitHubRegisPage()));
   void _goToFAQPage()         => Navigator.of(context).push(PremiumTransitions.slideRight(const FrequentlyAskedScreen()));
   void _goToPricingPage()     => Navigator.of(context).push(PremiumTransitions.slideRight(const PricingPage()));
+  void _goToWindcrestPage()   => Navigator.of(context).push(PremiumTransitions.slideRight(const WindcrestPage())); // Added Windcrest navigation
 
 
 
@@ -378,6 +378,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       auraController: _bgController,
                                       width: 150, height: 40,
                                       child: _buildButtonContent('F.A.Q.s', Icons.help_outline_rounded),
+                                    ),
+                                  ),
+                                  ButtonBulge(
+                                    child: AuraButton(
+                                      onPressed: _goToWindcrestPage, // Changed to Windcrest page
+                                      outlined: true,
+                                      auraController: _bgController,
+                                      width: 150, height: 40,
+                                      child: _buildButtonContent('Windcrest', Icons.open_in_new), // Added Windcrest button
                                     ),
                                   ),
                                   ButtonBulge(

@@ -31,7 +31,6 @@ class _HomeAnimationState extends State<HomeAnimation> with SingleTickerProvider
   void _initSpaceObjects() {
     final random = math.Random();
 
-    // 1. Chromatic Stars: Different sizes and colors for a realistic galaxy
     _stars = List.generate(200, (index) {
       final colors = [Colors.white, Colors.blueAccent, Colors.yellowAccent, Colors.purpleAccent];
       return Star(
@@ -44,7 +43,6 @@ class _HomeAnimationState extends State<HomeAnimation> with SingleTickerProvider
       );
     });
 
-    // 2. Orbiting Planets with atmospheric glows
     _planets = [
       Planet(
         radius: 22,
@@ -72,7 +70,6 @@ class _HomeAnimationState extends State<HomeAnimation> with SingleTickerProvider
       ),
     ];
 
-    // 3. Nebulae: Large, soft, drifting clouds of gas
     _nebulae = List.generate(4, (index) {
       return Nebula(
         x: random.nextDouble(),
@@ -122,7 +119,6 @@ class _HomeAnimationState extends State<HomeAnimation> with SingleTickerProvider
   }
 }
 
-// --- DATA MODELS ---
 
 class Star {
   final double x, y, size, phase, speed;
@@ -142,7 +138,6 @@ class Nebula {
   Nebula({required this.x, required this.y, required this.radius, required this.speed, required this.color});
 }
 
-// --- THE PAINTER ---
 
 class SpacePainter extends CustomPainter {
   final double animationValue;

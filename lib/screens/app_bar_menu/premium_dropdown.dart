@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:url_launcher/url_launcher.dart';
+
+// import 'package:newsos_app/screens/app_bar_menu/about/windcrest_page.dart';
 
 class PremiumDropdown extends StatefulWidget {
   final String label;
@@ -16,7 +19,6 @@ class _PremiumDropdownState extends State<PremiumDropdown> {
   OverlayEntry? _overlayEntry;
   bool _isOpen = false;
 
-
   final ValueNotifier<bool> _closeNotifier = ValueNotifier(false);
 
   void _toggleMenu() {
@@ -28,18 +30,16 @@ class _PremiumDropdownState extends State<PremiumDropdown> {
   }
 
   void _openMenu() {
-    _closeNotifier.value = false; // ye closing state ko reset karne ke kaam ata hai
+    _closeNotifier.value = false;
     _overlayEntry = _createOverlayEntry();
     Overlay.of(context).insert(_overlayEntry!);
     setState(() => _isOpen = true);
   }
 
   void _closeMenu() {
-    // instant removal ki jagah oe ham animation ko trigger kar dte hainn
     _closeNotifier.value = true;
   }
 
-  // ye tab call hota hai jab reveerse animation tigerr hoti hai
   void _onAnimationFinished() {
     _overlayEntry?.remove();
     _overlayEntry = null;
@@ -152,16 +152,14 @@ class _DropdownContentState extends State<_DropdownContent> with SingleTickerPro
       duration: const Duration(milliseconds: 350),
     );
 
-    // scale of button is 1.0 that represts full size
     _scaleAnimation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeOutBack, // bounce effect
+      curve: Curves.easeOutBack,
     );
 
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_scaleAnimation);
+    _opacityAnimation = _scaleAnimation;
 
     _controller.forward();
-
 
     widget.closeNotifier.addListener(_handleCloseSignal);
   }
@@ -183,8 +181,7 @@ class _DropdownContentState extends State<_DropdownContent> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     return ScaleTransition(
-
-      scale: Tween<double>(begin: 0.0, end: 1.0).animate(_scaleAnimation),
+      scale: _scaleAnimation,
       child: FadeTransition(
         opacity: _opacityAnimation,
         child: Material(
@@ -234,12 +231,20 @@ class _DropdownContentState extends State<_DropdownContent> with SingleTickerPro
   }
 
   Widget _buildItem(DropdownItem item) {
+    final VoidCallback effectiveOnTap = item.title == 'Windcrest'
+        ? () async {
+      final Uri url = Uri(scheme: 'https', host: 'windcrest-gilt.vercel.app');
+      if (!await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      )) {
+        throw 'Could not launch $url';
+      }
+    }
+        : item.onTap;
+
     return InkWell(
-      onTap: () {
-        item.onTap();
-        // trigger close animation
-        widget.closeNotifier.value = true;
-      },
+      onTap: effectiveOnTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),

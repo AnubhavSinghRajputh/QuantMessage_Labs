@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 
-// BottomInfoPanel — QuantMessage footer, styled after Claude's mega-footer
+
 // Location: lib/screens/bottom_info/bottom_info.dart
 
 
@@ -25,10 +25,8 @@ class BottomInfoPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Feature highlight strip
           _FeatureStrip(isMobile: isMobile),
 
-          // Main footer body
           Padding(
             padding: EdgeInsets.symmetric(
               vertical: isMobile ? 48 : 72,
@@ -71,9 +69,6 @@ class BottomInfoPanel extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Feature strip
-// ---------------------------------------------------------------------------
 
 class _FeatureStrip extends StatelessWidget {
   final bool isMobile;
@@ -172,9 +167,6 @@ class _FeaturePillState extends State<_FeaturePill> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Brand section (left column)
-// ---------------------------------------------------------------------------
 
 class _BrandSection extends StatelessWidget {
   const _BrandSection();
@@ -378,14 +370,12 @@ class _PulsingDotState extends State<_PulsingDot>
 }
 
 
-// Footer links KE GRIDS   HAIN 4 COLUMS AND 4 ROWS
 
 
 class _FooterLinksGrid extends StatelessWidget {
   final bool isMobile;
   const _FooterLinksGrid({required this.isMobile});
 
-  // Row 1 — top four columns (matches Claude's Products / Solutions / Resources / Help)
   static const _topSections = [
     {
       'title': 'Product',
@@ -434,7 +424,6 @@ class _FooterLinksGrid extends StatelessWidget {
     },
   ];
 
-  // Row 2 — bottom four columns (matches Claude's Features / Claude Platform / Company / Terms)
   static const _bottomSections = [
     {
       'title': 'Features',
@@ -504,7 +493,6 @@ class _FooterLinksGrid extends StatelessWidget {
       );
     }
 
-    // Desktop: two rows of four columns each
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -626,9 +614,6 @@ class _FooterLinkState extends State<_FooterLink> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Bottom bar
-// ---------------------------------------------------------------------------
 
 class _BottomBar extends StatelessWidget {
   final bool isMobile;
@@ -639,7 +624,7 @@ class _BottomBar extends StatelessWidget {
     final year = DateTime.now().year;
 
     final copyright = Text(
-      '© $year QUANTMESSAGE, Inc. All rights reserved.',
+      ' $year QUANTMESSAGE, Inc. All rights reserved.',
       style: TextStyle(
         color: Colors.white.withOpacity(0.25),
         fontSize: 12,
@@ -744,9 +729,6 @@ class _LegalLinkState extends State<_LegalLink> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Supporting painters / icons
-// ---------------------------------------------------------------------------
 
 class _GithubIcon extends StatelessWidget {
   const _GithubIcon();
@@ -790,7 +772,6 @@ class _QMLogoPainter extends CustomPainter {
     final cy = size.height / 2;
     final r = size.width / 2;
 
-    // Outer glow ring
     final glowPaint = Paint()
       ..color = const Color(0x409B8FFF)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
@@ -803,11 +784,9 @@ class _QMLogoPainter extends CustomPainter {
       ..strokeWidth = 1.8;
     canvas.drawCircle(Offset(cx, cy), r * 0.72, ringPaint);
 
-    // Inner dot
     final dotPaint = Paint()..color = const Color(0xFFD4CFFF);
     canvas.drawCircle(Offset(cx, cy), r * 0.18, dotPaint);
 
-    // Spokes
     final spokePaint = Paint()
       ..color = const Color(0x99A89CFF)
       ..strokeWidth = 1.2

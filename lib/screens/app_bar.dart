@@ -118,52 +118,69 @@ class PremiumAppBar extends StatelessWidget implements PreferredSizeWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // VERSION BADGE (FIXED LAYOUT)
                       if (screenWidth > 400)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.white.withOpacity(0.15)),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(16),
                             color: Colors.white.withOpacity(0.03),
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
-                                width: 6, height: 6,
+                                width: 8, height: 8,
                                 decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle),
                               ),
-                              const SizedBox(width: 6),
-                              const Text('v1.0.0', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 4),
+                              const Text(
+                                'v1.0.0',
+                                style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.2
+                                ),
+                              ),
                             ],
                           ),
                         ),
 
-                      if (screenWidth > 400) const SizedBox(width: 12),
+                      // SPACING (CONDITIONAL)
+                      if (screenWidth > 400)
+                        const SizedBox(width: 12),
 
+                      // MOBILE MENU (FIXED FOR PIXEL FLOW)
                       if (isMobile)
                         ButtonBulge(
-                          // MODIFIED: Instead of IconButton, we use the PremiumDropdown here
-                          // This gives us the 3D Bulge, the White Capsule, and the 3D-Animated Menu
-                          child: PremiumDropdown(
-                            label: "MENU", // This replaces the 3-lined icon with a professional capsule
-                            columns: [
-                              DropdownColumn(
-                                title: "QUICK LINKS",
-                                items: [
-                                  DropdownItem(title: "About Quant", onTap: () {}),
-                                  DropdownItem(title: "Platform", onTap: () {}),
-                                  DropdownItem(title: "Pricing", onTap: () {}),
-                                  DropdownItem(title: "Support", onTap: () {}),
+                          child: SizedBox(
+                            width: 80, // Fixed width prevents layout shifts
+                            height: 32, // Fixed height for consistent tap target
+                            child: Center(
+                              child: PremiumDropdown(
+                                label: "MENU",
+                                columns: [
+                                  DropdownColumn(
+                                    title: "QUICK LINKS",
+                                    items: [
+                                      DropdownItem(title: "About Quant", onTap: () {}),
+                                      DropdownItem(title: "Platform", onTap: () {}),
+                                      DropdownItem(title: "Pricing", onTap: () {}),
+                                      DropdownItem(title: "Support", onTap: () {}),
+                                    ],
+                                  ),
+                                  DropdownColumn(
+                                    title: "PRODUCTS",
+                                    items: [
+                                      DropdownItem(title: "QuantMessage", onTap: () {}),
+                                      DropdownItem(title: "QuantSync", onTap: () {}),
+                                    ],
+                                  ),
                                 ],
                               ),
-                              DropdownColumn(
-                                title: "PRODUCTS",
-                                items: [
-                                  DropdownItem(title: "QuantMessage", onTap: () {}),
-                                  DropdownItem(title: "QuantSync", onTap: () {}),
-                                ],
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                     ],
