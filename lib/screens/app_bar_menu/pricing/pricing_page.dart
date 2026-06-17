@@ -127,13 +127,12 @@ class _PricingPageState extends State<PricingPage>
   late final AnimationController _heroCtrl;
 
   BillingCycle _cycle    = BillingCycle.monthly;
-  PricingPlan  _selected = _plans[2]; // default to Prime (highlighted plan)
+  PricingPlan  _selected = _plans[2];
   bool         _addOnSelected = false;
 
   Key _swapKey = const ValueKey('plans_grid_v1');
 
-  // drives PremiumBackgroundStack's moving dots + fluid mesh,
-  // and also any CirculatingAura / AuraButton on this page
+
   late final AnimationController _bgController;
 
   @override
@@ -343,8 +342,8 @@ class _PricingPageState extends State<PricingPage>
                 .toList(),
           );
         }
-        // 2x2 grid between mobile and ultra-wide; single row beyond ~1100px
-        final useTwoColumns = width < 1100;
+// 2 cross 2 mobile ki grid
+         final useTwoColumns = width < 1100;
         if (useTwoColumns) {
           return Column(
             children: [
@@ -691,8 +690,6 @@ class _PlanCardState extends State<_PlanCard> {
       onExit:  (_) => setState(() => _hovered = false),
       child: GestureDetector(
         onTap: widget.onSelect,
-        // Highlighted (Prime) plan gets the circulating aura border to
-        // visually call it out, matching CirculatingAura from premium_effects.
         child: highlighted
             ? CirculatingAura(
           controller: widget.bgController,
