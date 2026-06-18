@@ -1,5 +1,6 @@
-
+// lib/screens/overlays/overlays_pannel.dart
 import 'package:flutter/material.dart';
+import 'package:newsos_app/screens/documentations/documentation_homescreen/documentation_homescreen.dart';
 import '../animations/pendulum_animation.dart';
 import '../transition_animations.dart';
 
@@ -116,6 +117,23 @@ class _OverlaysPanelState extends State<OverlaysPanel>
 
   void onBecameVisible() {
     if (!_heroCtrl.isCompleted) _heroCtrl.forward();
+  }
+
+  // Default behaviour for the "See developer docs" button: open the
+  // documentation home screen. Callers that pass their own [onDocsTap]
+  // via the widget constructor still take priority — see _handleDocsTap.
+  void _openDocumentation() {
+    Navigator.of(context).push(
+      PremiumTransitions.slideRight(const DocumentationHomescreen()),
+    );
+  }
+
+  void _handleDocsTap() {
+    if (widget.onDocsTap != null) {
+      widget.onDocsTap!();
+    } else {
+      _openDocumentation();
+    }
   }
 
   @override
@@ -256,7 +274,7 @@ class _OverlaysPanelState extends State<OverlaysPanel>
             ),
           ),
           const SizedBox(height: 32),
-          _DocsButton(onTap: widget.onDocsTap),
+          _DocsButton(onTap: _handleDocsTap),
         ],
       ),
     );

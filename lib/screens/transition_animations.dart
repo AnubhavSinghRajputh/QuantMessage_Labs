@@ -1,4 +1,4 @@
-//transition_animations.dart
+// lib/screens/transition_animations.dart
 import 'package:flutter/material.dart';
 
 class PremiumTransitions {
@@ -68,7 +68,6 @@ class PremiumTransitions {
     );
   }
 
-  /// 4. YE SOFT CROSS-FADE effect ke liye
   static Route softFade(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
