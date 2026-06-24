@@ -4,13 +4,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-/// A single scripted beat in the iOS Messages-style conversation.
-///
-/// Mirrors the shape of `TerminalLine` from terminal_animation.dart so the
-/// two widgets can be authored side by side: each entry waits [delayBefore],
-/// then plays out (typing into the input bar, showing "•••" typing dots,
-/// revealing a bubble, etc.), then waits [holdAfter] before the next line
-/// starts.
+
 class IOSMessageLine {
   const IOSMessageLine({
     required this.type,
@@ -25,18 +19,15 @@ class IOSMessageLine {
   final IOSLineType type;
   final String text;
 
-  /// Pause before this line begins playing.
+
   final Duration delayBefore;
 
-  /// Whether the text is revealed character-by-character. For [IOSLineType.sent]
-  /// this animates the text being composed in the input bar before "sending".
-  /// For [IOSLineType.received] this animates the text appearing inside the
-  /// bubble after the typing-dots indicator. Set false for an instant reveal.
+
   final bool animateTyping;
 
   final Duration typingSpeed;
 
-  /// Pause after this line finishes before the next one starts.
+
   final Duration holdAfter;
 
   /// Only used by [IOSLineType.received]: how long the "•••" typing-dots
